@@ -1,8 +1,8 @@
-package com.ritense.valtimo.suwinet.service
+package com.ritense.valtimoplugins.suwinet.service
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.ritense.valtimo.suwinet.model.NationaliteitDto
+import com.ritense.valtimoplugins.suwinet.model.NationaliteitDto
 import org.springframework.core.io.ClassPathResource
 
 class NationaliteitenService {

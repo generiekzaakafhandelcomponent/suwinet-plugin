@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.plugin
+package com.ritense.valtimoplugins.suwinet.plugin
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -7,8 +7,8 @@ import com.ritense.plugin.annotation.PluginAction
 import com.ritense.plugin.annotation.PluginActionProperty
 import com.ritense.plugin.annotation.PluginProperty
 import com.ritense.processlink.domain.ActivityTypeWithEventName.SERVICE_TASK_START
-import com.ritense.valtimo.suwinet.client.SuwinetSOAPClientConfig
-import com.ritense.valtimo.suwinet.service.SuwinetBrpInfoService
+import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
+import com.ritense.valtimoplugins.suwinet.service.SuwinetBrpInfoService
 import java.net.URI
 import mu.KotlinLogging
 import org.camunda.bpm.engine.delegate.DelegateExecution

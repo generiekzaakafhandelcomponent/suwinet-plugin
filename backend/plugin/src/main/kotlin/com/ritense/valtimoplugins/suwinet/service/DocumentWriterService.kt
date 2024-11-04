@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.service
+package com.ritense.valtimoplugins.suwinet.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

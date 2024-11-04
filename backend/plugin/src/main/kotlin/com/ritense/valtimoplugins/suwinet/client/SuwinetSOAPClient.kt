@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.client
+package com.ritense.valtimoplugins.suwinet.client
 
 import java.io.FileInputStream
 import java.security.KeyStore

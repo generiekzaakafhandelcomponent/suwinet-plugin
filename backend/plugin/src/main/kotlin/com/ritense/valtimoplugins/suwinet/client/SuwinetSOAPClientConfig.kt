@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.client
+package com.ritense.valtimoplugins.suwinet.client
 
 data class SuwinetSOAPClientConfig(
     val baseUrl: String,

@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.model
+package com.ritense.valtimoplugins.suwinet.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 

@@ -1,10 +1,10 @@
-package com.ritense.valtimo.suwinet.service
+package com.ritense.valtimoplugins.suwinet.service
 
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.document.service.DocumentService
-import com.ritense.valtimo.suwinet.exception.ParseToDtoException
-import com.ritense.valtimo.suwinet.model.PersoonDto
+import com.ritense.valtimoplugins.suwinet.exception.ParseToDtoException
+import com.ritense.valtimoplugins.suwinet.model.PersoonDto
 import java.time.temporal.ChronoField
 import mu.KotlinLogging
 

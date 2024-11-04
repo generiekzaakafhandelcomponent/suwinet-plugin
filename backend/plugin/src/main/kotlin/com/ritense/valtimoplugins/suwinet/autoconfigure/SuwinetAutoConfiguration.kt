@@ -1,15 +1,15 @@
-package com.ritense.valtimo.suwinet.autoconfigure
+package com.ritense.valtimoplugins.suwinet.autoconfigure
 
 import com.ritense.document.service.DocumentService
 import com.ritense.plugin.service.PluginService
 import com.ritense.valtimo.contract.annotation.ProcessBean
-import com.ritense.valtimo.suwinet.client.SuwinetSOAPClient
-import com.ritense.valtimo.suwinet.plugin.SuwiNetPluginFactory
-import com.ritense.valtimo.suwinet.service.DateTimeService
-import com.ritense.valtimo.suwinet.service.DocumentWriterService
-import com.ritense.valtimo.suwinet.service.NationaliteitenService
-import com.ritense.valtimo.suwinet.service.SuwinetBrpInfoService
-import com.ritense.valtimo.suwinet.service.SuwinetBrpStoreToDocService
+import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
+import com.ritense.valtimoplugins.suwinet.plugin.SuwiNetPluginFactory
+import com.ritense.valtimoplugins.suwinet.service.DateTimeService
+import com.ritense.valtimoplugins.suwinet.service.DocumentWriterService
+import com.ritense.valtimoplugins.suwinet.service.NationaliteitenService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetBrpInfoService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetBrpStoreToDocService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

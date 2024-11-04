@@ -1,3 +1,3 @@
-package com.ritense.valtimo.suwinet.model
+package com.ritense.valtimoplugins.suwinet.model
 
 data class NationaliteitDto(val code: String, val name: String)

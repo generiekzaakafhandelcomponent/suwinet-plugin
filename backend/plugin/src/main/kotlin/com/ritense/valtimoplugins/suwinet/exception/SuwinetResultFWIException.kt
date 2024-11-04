@@ -1,3 +1,3 @@
-package com.ritense.valtimo.suwinet.exception
+package com.ritense.valtimoplugins.suwinet.exception
 
 class SuwinetResultFWIException(message: String) : RuntimeException(message)

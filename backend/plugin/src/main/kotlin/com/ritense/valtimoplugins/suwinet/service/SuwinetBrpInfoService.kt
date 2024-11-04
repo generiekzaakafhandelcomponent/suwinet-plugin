@@ -1,4 +1,4 @@
-package com.ritense.valtimo.suwinet.service
+package com.ritense.valtimoplugins.suwinet.service
 
 import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.AanvraagPersoonResponse
 import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.BRPInfo
@@ -10,13 +10,13 @@ import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Nationaliteit
 import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.ObjectFactory
 import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Straatadres
 import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Verblijfstitel
-import com.ritense.valtimo.suwinet.client.SuwinetSOAPClient
-import com.ritense.valtimo.suwinet.client.SuwinetSOAPClientConfig
-import com.ritense.valtimo.suwinet.exception.SuwinetResultFWIException
-import com.ritense.valtimo.suwinet.exception.SuwinetResultNotFoundException
-import com.ritense.valtimo.suwinet.model.AdresDto
-import com.ritense.valtimo.suwinet.model.NationaliteitDto
-import com.ritense.valtimo.suwinet.model.PersoonDto
+import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
+import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
+import com.ritense.valtimoplugins.suwinet.exception.SuwinetResultFWIException
+import com.ritense.valtimoplugins.suwinet.exception.SuwinetResultNotFoundException
+import com.ritense.valtimoplugins.suwinet.model.AdresDto
+import com.ritense.valtimoplugins.suwinet.model.NationaliteitDto
+import com.ritense.valtimoplugins.suwinet.model.PersoonDto
 import mu.KotlinLogging
 
 class SuwinetBrpInfoService(
