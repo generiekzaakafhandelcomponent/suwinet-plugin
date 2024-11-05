@@ -23,8 +23,8 @@ pluginManager.withPlugin("maven-publish") {
                 version = pluginProperties.pluginVersion
 
                 pom {
-                    name = "suwinet"
-                    description = "suwinet is a plugin for valtimo"
+                    name = "Suwinet"
+                    description = "Suwinet is a plugin for valtimo that simplifies civil data exchange via the Suwinet platform"
                     developers {
                         developer {
                             id = "team-valtimo"
