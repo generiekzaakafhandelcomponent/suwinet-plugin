@@ -79,7 +79,7 @@ dependencies {
 
 }
 
-//apply(from = "gradle/publishing.gradle")
+apply(from = "gradle/publishing.gradle")
 
 
 tasks.register<Wsdl2Java>("genBRPDossierPersoonGSD") {
