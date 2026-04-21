@@ -16,9 +16,28 @@ import io.spring.gradle.dependencymanagement.org.apache.maven.model.Build
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+val apacheCxfVersion: String by project
+val auth0JavaJwtVersion: String by project
+val cxfCodegenVersion: String by project
+val httpclient5Version: String by project
+val httpcoreVersion: String by project
+val jacksonVersion: String by project
+val jakartaAnnotationVersion: String by project
+val jakartaJwsVersion: String by project
+val jakartaXmlBindVersion: String by project
+val jakartaXmlWsVersion: String by project
+val jaxbRuntimeVersion: String by project
+val jsonPathVersion: String by project
+val junitJupiterVersion: String by project
+val kotlinLoggingVersion: String by project
+val mockitoKotlinVersion: String by project
+val okhttpVersion: String by project
+val sumXmlWsVersion: String by project
+val suwinetAuthVersion: String by project
+
 plugins {
     // CFX
-    id("io.mateo.cxf-codegen") version "2.4.0"
+    id("io.mateo.cxf-codegen") version "$cxfCodegenVersion"
 }
 
 dockerCompose {
@@ -31,63 +50,63 @@ dockerCompose {
 }
 
 dependencies {
-    implementation(project(":backend:suwinet-auth"))
+    implementation("com.ritense.valtimoplugins:suwinet-auth:$suwinetAuthVersion")
 
     implementation("com.ritense.valtimo:contract")
     implementation("com.ritense.valtimo:core")
     implementation("com.ritense.valtimo:plugin-valtimo")
     implementation("com.ritense.valtimo:value-resolver")
-    implementation("com.ritense.valtimo:document")
+    implementation("com.ritense.valtimo:case")
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.core:jackson-annotations")
     implementation("com.fasterxml.jackson.core:jackson-core")
 
     // Apache deps
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.4")
-    implementation("org.apache.httpcomponents:httpcore:4.4.15")
+    implementation("org.apache.httpcomponents.client5:httpclient5:$httpclient5Version")
+    implementation("org.apache.httpcomponents:httpcore:$httpcoreVersion")
 
-    implementation("com.auth0:java-jwt:4.4.0")
+    implementation("com.auth0:java-jwt:$auth0JavaJwtVersion")
 
     // CXF Codegen
-    cxfCodegen("jakarta.xml.ws:jakarta.xml.ws-api:4.0.2")
-    cxfCodegen("jakarta.annotation:jakarta.annotation-api:3.0.0")
-    cxfCodegen("jakarta.xml.bind:jakarta.xml.bind-api:4.0.2")
-    cxfCodegen("jakarta.jws:jakarta.jws-api:3.0.0")
-    cxfCodegen("org.apache.cxf:cxf-rt-ws-addr:4.1.4")
+    cxfCodegen("jakarta.xml.ws:jakarta.xml.ws-api:$jakartaXmlWsVersion")
+    cxfCodegen("jakarta.annotation:jakarta.annotation-api:$jakartaAnnotationVersion")
+    cxfCodegen("jakarta.xml.bind:jakarta.xml.bind-api:$jakartaXmlBindVersion")
+    cxfCodegen("jakarta.jws:jakarta.jws-api:$jakartaJwsVersion")
+    cxfCodegen("org.apache.cxf:cxf-rt-ws-addr:$apacheCxfVersion")
 
     // Apache CXF and Jakarta dependencies
-    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:4.0.7")
-    implementation("org.apache.cxf:cxf-rt-transports-http:4.1.4")
-    implementation("org.apache.cxf:cxf-rt-features-logging:4.1.4")
-    implementation("org.apache.cxf:cxf-rt-bindings-soap:4.0.7")
-    implementation("org.apache.cxf:cxf-rt-ws-addr:4.0.7")
-    implementation("com.sun.xml.ws:jaxws-ri:4.0.3")
-    implementation("org.glassfish.jaxb:jaxb-runtime:4.0.5")
+    implementation("org.apache.cxf:cxf-rt-frontend-jaxws:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-rt-transports-http:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-rt-features-logging:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-rt-bindings-soap:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-rt-ws-addr:$apacheCxfVersion")
+    implementation("com.sun.xml.ws:jaxws-ri:$sumXmlWsVersion")
+    implementation("org.glassfish.jaxb:jaxb-runtime:$jaxbRuntimeVersion")
 
-    implementation("org.apache.cxf:cxf-tools-common:4.0.7")
-    implementation("org.apache.cxf:cxf-tools-wsdlto-core:4.0.7")
-    implementation("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:4.0.7")
-    implementation("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:4.0.7")
+    implementation("org.apache.cxf:cxf-tools-common:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-tools-wsdlto-core:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:$apacheCxfVersion")
+    implementation("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:$apacheCxfVersion")
 
     // Testing
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
-    testImplementation("com.fasterxml.jackson.core:jackson-annotations:2.14.2")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:2.14.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-migrationsupport:5.9.1")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    testImplementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-migrationsupport:$junitJupiterVersion")
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito:mockito-junit-jupiter")
     testImplementation("org.hamcrest:hamcrest-library")
-    testImplementation("com.jayway.jsonpath:json-path:2.7.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("com.jayway.jsonpath:json-path:$jsonPathVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
 
 
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
-    testImplementation("com.squareup.okhttp3:okhttp:4.10.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
+    testImplementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
