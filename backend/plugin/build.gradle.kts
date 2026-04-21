@@ -37,7 +37,7 @@ val suwinetAuthVersion: String by project
 
 plugins {
     // CFX
-    id("io.mateo.cxf-codegen") version "$cxfCodegenVersion"
+    id("io.mateo.cxf-codegen") version "2.4.0"
 }
 
 dockerCompose {

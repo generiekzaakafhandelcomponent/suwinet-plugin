@@ -25,7 +25,7 @@ import com.ritense.valtimoplugins.suwinet.model.brp.PersoonDto
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.xml.ws.WebServiceException
 import jakarta.xml.ws.soap.SOAPFaultException
-import org.camunda.bpm.engine.exception.NotFoundException
+import org.operaton.bpm.engine.exception.NotFoundException
 import org.springframework.util.StringUtils
 import java.time.LocalDate
 import java.time.YearMonth

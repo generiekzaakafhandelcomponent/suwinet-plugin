@@ -22,9 +22,9 @@ import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvPersoonsIkvService
 import com.ritense.valtimoplugins.suwinetauth.plugin.SuwinetAuth
 import java.net.URI
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.camunda.bpm.engine.delegate.BpmnError
-import org.camunda.bpm.engine.delegate.DelegateExecution
-import org.camunda.bpm.engine.exception.NotFoundException
+import org.operaton.bpm.engine.delegate.BpmnError
+import org.operaton.bpm.engine.delegate.DelegateExecution
+import org.operaton.bpm.engine.exception.NotFoundException
 
 @Plugin(
     key = "suwinet", title = "SuwiNet Plugin", description = "Suwinet plugin description"
