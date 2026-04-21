@@ -1,0 +1,7 @@
+[
+    {
+        "processDefinitionKey": "suwinet-brp-ophalen",
+        "canInitializeDocument": true,
+        "startableByUser": false
+    }
+]
