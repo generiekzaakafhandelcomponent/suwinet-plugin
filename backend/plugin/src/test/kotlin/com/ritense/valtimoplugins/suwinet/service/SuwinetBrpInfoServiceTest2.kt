@@ -1,9 +1,9 @@
 package com.ritense.valtimoplugins.suwinet.service
 
 import com.ritense.valtimo.TestHelper
-import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.AanvraagPersoonResponse
-import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.BRPInfo
-import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Request
+import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.AanvraagPersoonResponse
+import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.BRPInfo
+import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Request
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
