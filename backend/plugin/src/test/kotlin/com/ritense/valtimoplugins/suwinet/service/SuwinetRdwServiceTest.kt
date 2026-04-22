@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.rdwdossier.KentekenInfo
@@ -53,28 +52,28 @@ internal class SuwinetRdwServiceTest : BaseTest() {
     fun `retrieving voertuig bezit and details with 2 voertuigen from RDW suwinet to Motorvoertuigen lijst in doc`() {
         // given
         val bsn = "111111110"
-        val kenteken_MH74DZ = "MH74DZ"
-        val kenteken_16ZDLX = "16ZDLX"
+        val kentekenMh74dz = "MH74DZ"
+        val kentekenZdlx16 = "16ZDLX"
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
             testHelper.unmarshal<VoertuigbezitInfoPersoonResponse>(
-                "RDWDossierGSD_VoertuigbezitInfoPersoon_111111110.xml"
-            )
+                "RDWDossierGSD_VoertuigbezitInfoPersoon_111111110.xml",
+            ),
         )
         val paramKentekenInfo = ArgumentCaptor.forClass(KentekenInfo::class.java)
         whenever(
-            rdwService.kentekenInfo(paramKentekenInfo.capture())
+            rdwService.kentekenInfo(paramKentekenInfo.capture()),
         ).thenAnswer {
             val kentekenInfo = it.arguments[0] as KentekenInfo
             testHelper.unmarshal<KentekenInfoResponse>(
-                "RDWDossierGSD_KentekenInfo_${kentekenInfo.kentekenVoertuig}.xml"
+                "RDWDossierGSD_KentekenInfo_${kentekenInfo.kentekenVoertuig}.xml",
             )
         }
         val result = suwinetRdwService.getVoertuigbezitInfoPersoonByBsn(bsn, rdwService)
         // then
         assertEquals("found motorvoertuigen should be 2", result.motorVoertuigen.size, 2)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kenteken_MH74DZ)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kenteken_16ZDLX)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kentekenMh74dz)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kentekenZdlx16)
     }
 
     @Test
@@ -85,8 +84,8 @@ internal class SuwinetRdwServiceTest : BaseTest() {
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
             testHelper.unmarshal<VoertuigbezitInfoPersoonResponse>(
-                "RDWDossierGSD_VoertuigbezitInfoPersoon_Nietsgevonden.xml"
-            )
+                "RDWDossierGSD_VoertuigbezitInfoPersoon_Nietsgevonden.xml",
+            ),
         )
         val result = suwinetRdwService.getVoertuigbezitInfoPersoonByBsn(bsn, rdwService)
 
@@ -95,43 +94,42 @@ internal class SuwinetRdwServiceTest : BaseTest() {
     }
 
     @Test
-    fun `retrieving voertuig bezit with 3 voertuigen from RDW with second details call kenteken not found to Motorvoertuigen lijst in doc`() {
-
+    fun `retrieving voertuig bezit with 3 voertuigen from RDW with second details call kenteken not found`() {
         // given
         val bsn = "111111110"
-        val kenteken_MH74DZ = "MH74DZ"
-        val kenteken_AA00BB = "ONBEKE"
-        val kenteken_16ZDLX = "16ZDLX"
+        val kentekenMh74dz = "MH74DZ"
+        val kentekenAa00bb = "ONBEKE"
+        val kentekenZdlx16 = "16ZDLX"
 
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
             testHelper.unmarshal<VoertuigbezitInfoPersoonResponse>(
-                "RDWDossierGSD_VoertuigbezitInfoPersoon_111111110_voertuig_ontbreekt.xml"
-            )
+                "RDWDossierGSD_VoertuigbezitInfoPersoon_111111110_voertuig_ontbreekt.xml",
+            ),
         )
 
         val paramKentekenInfo = ArgumentCaptor.forClass(KentekenInfo::class.java)
         whenever(
-            rdwService.kentekenInfo(paramKentekenInfo.capture())
+            rdwService.kentekenInfo(paramKentekenInfo.capture()),
         ).thenAnswer {
             val kentekenInfo = it.arguments[0] as KentekenInfo
             testHelper.unmarshal<KentekenInfoResponse>(
-                "RDWDossierGSD_KentekenInfo_${kentekenInfo.kentekenVoertuig}.xml"
+                "RDWDossierGSD_KentekenInfo_${kentekenInfo.kentekenVoertuig}.xml",
             )
         }
         val result = suwinetRdwService.getVoertuigbezitInfoPersoonByBsn(bsn, rdwService)
         result.motorVoertuigen.forEach {
-            logger.info { "voertuig: ${it}" }
+            logger.info { "voertuig: $it" }
         }
         // then
         assertEquals("found motorvoertuigen should be 3", result.motorVoertuigen.size, 3)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kenteken_MH74DZ)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kenteken_AA00BB)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[2].kenteken, kenteken_16ZDLX)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kentekenMh74dz)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kentekenAa00bb)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[2].kenteken, kentekenZdlx16)
     }
 
     @Test
-    fun `happy flow retrieving voertuig bezit and details with 1 voertuig from RDW suwinet to Motorvoertuigen lijst in doc`() {
+    fun `happy flow retrieving voertuig bezit and details with 1 voertuig from RDW suwinet`() {
         // given
         val bsn = "444444440"
         val kenteken = "MH74DZ"
@@ -139,19 +137,20 @@ internal class SuwinetRdwServiceTest : BaseTest() {
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
             testHelper.unmarshal<VoertuigbezitInfoPersoonResponse>(
-                "RDWDossierGSD_VoertuigbezitInfoPersoon_444444440.xml"
-            )
+                "RDWDossierGSD_VoertuigbezitInfoPersoon_444444440.xml",
+            ),
         )
         whenever(rdwService.kentekenInfo(any())).thenReturn(
             testHelper.unmarshal<KentekenInfoResponse>(
-                "RDWDossierGSD_KentekenInfo_MH74DZ.xml"
-            )
+                "RDWDossierGSD_KentekenInfo_MH74DZ.xml",
+            ),
         )
 
-        val result = suwinetRdwService.getVoertuigbezitInfoPersoonByBsn(
-            bsn,
-            rdwService
-        )
+        val result =
+            suwinetRdwService.getVoertuigbezitInfoPersoonByBsn(
+                bsn,
+                rdwService,
+            )
 
         // then
         assertEquals("found motorvoertuigen should be 1", result.motorVoertuigen.size, 1)
@@ -160,7 +159,7 @@ internal class SuwinetRdwServiceTest : BaseTest() {
 
     @Test
     fun `should map RDW voertuig to SimpleMotorVoertuig with given kenteken`() {
-        //given
+        // given
         val kenteken = "AA00BB"
         val rdwVoertuig = getRdwVoertuig(kenteken)
 
@@ -174,7 +173,7 @@ internal class SuwinetRdwServiceTest : BaseTest() {
 
     @Test
     fun `should map RDW voertuig to empty simple motor voertuig with soort 'onbekend'`() {
-        //given
+        // given
         val rdwVoertuig = null
 
         // when
@@ -189,19 +188,24 @@ internal class SuwinetRdwServiceTest : BaseTest() {
 
     @Test
     fun `should map RDW voertuig to SimpleMotorVoertuig with soortvoertuig 'onbekend'`() {
-        //given
+        // given
         val kenteken = "AA00BB"
         val rdwVoertuig = getRdwVoertuig(kenteken)
 
         // when
         val simpleMotorvoertuig = suwinetRdwService.mapToSimpleMotorvoertuig(rdwVoertuig)
         // then
-        assertThat(simpleMotorvoertuig.soortMotorvoertuig.get("name").asText().equals("onbekend"))
+        assertThat(
+            simpleMotorvoertuig.soortMotorvoertuig
+                .get("name")
+                .asText()
+                .equals("onbekend"),
+        )
     }
 
     @Test
     fun `should map RDW voertuig to SimpleMotorVoertuig with empty kenteken`() {
-        //given
+        // given
         val kenteken = ""
         val rdwVoertuig = getRdwVoertuig(kenteken)
 
