@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.duodossierpersoongsd.DUOInfo
@@ -21,7 +20,6 @@ import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
-
     @Mock
     lateinit var duoInfoService: DUOInfo
 
@@ -51,18 +49,19 @@ internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoPersoonsInfo(any(DUOPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOPersoonsInfoResponse>(
-                "DUODossierPersoonGSD_DUOPersoonsInfo_999991954.xml"
+                "DUODossierPersoonGSD_DUOPersoonsInfo_999991954.xml",
+            ),
+        )
+        val result =
+            suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
+                bsn,
+                duoInfoService,
             )
-        )
-        val result = suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
-            bsn,
-            duoInfoService
-        )
 
         // then
         assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
-        assertEquals("number of onderwijsOvereenkomsten should be 1", result.onderwijsOvereenkomst.size, 1 )
-        assertEquals("brin should match 20KD", result.onderwijsOvereenkomst.get(0).brin, "20KD" )
+        assertEquals("number of onderwijsOvereenkomsten should be 1", result.onderwijsOvereenkomst.size, 1)
+        assertEquals("brin should match 20KD", result.onderwijsOvereenkomst.get(0).brin, "20KD")
     }
 
     @Test
@@ -73,16 +72,17 @@ internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoPersoonsInfo(any(DUOPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOPersoonsInfoResponse>(
-                "DUOPersoonsInfoResponse_Nietsgevonden.xml"
+                "DUOPersoonsInfoResponse_Nietsgevonden.xml",
+            ),
+        )
+        val result =
+            suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
+                bsn,
+                duoInfoService,
             )
-        )
-        val result = suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
-            bsn,
-            duoInfoService
-        )
 
         // then
         assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
-        assertEquals("number of onderwijsOvereenkomsten should be 1", result.onderwijsOvereenkomst.size, 0 )
+        assertEquals("number of onderwijsOvereenkomsten should be 1", result.onderwijsOvereenkomst.size, 0)
     }
 }

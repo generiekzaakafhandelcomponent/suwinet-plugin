@@ -1,27 +1,23 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.Bijstandsregelingen.BijstandsregelingenInfo
 import com.ritense.valtimoplugins.dkd.Bijstandsregelingen.BijstandsregelingenInfoResponse
-
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.any
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.test.assertEquals
 
-
 @MockitoSettings(strictness = Strictness.LENIENT)
-class SuwinetBijstandsregelingenServiceTest: BaseTest() {
-
+class SuwinetBijstandsregelingenServiceTest : BaseTest() {
     @Mock
     private lateinit var suwinetSOAPClient: SuwinetSOAPClient
 
@@ -45,7 +41,6 @@ class SuwinetBijstandsregelingenServiceTest: BaseTest() {
         service.setConfig(soapClientConfig, "")
     }
 
-
     @Test
     fun `getBijstandsregelingenByBsn should return valid response for ClientSuwi`() {
         val bsn = "111111110"
@@ -53,8 +48,8 @@ class SuwinetBijstandsregelingenServiceTest: BaseTest() {
         // when
         whenever(info.bijstandsregelingenInfo(any())).thenReturn(
             testHelper.unmarshal<BijstandsregelingenInfoResponse>(
-                "Bijstandsregelingen_Info_111111110.xml"
-            )
+                "Bijstandsregelingen_Info_111111110.xml",
+            ),
         )
 
         val result = service.getBijstandsregelingenByBsn(bsn, info)

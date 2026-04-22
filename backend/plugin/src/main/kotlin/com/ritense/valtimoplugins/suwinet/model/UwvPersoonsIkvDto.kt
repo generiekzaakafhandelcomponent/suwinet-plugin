@@ -4,8 +4,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 data class UwvPersoonsIkvDto(
-    val inkomsten: List<Inkomsten>
-
+    val inkomsten: List<Inkomsten>,
 ) {
     data class Inkomsten(
         val naamRechtspersoon: String?,
@@ -14,8 +13,9 @@ data class UwvPersoonsIkvDto(
         val loonheffingennummer: String?,
         val straatadres: AdresDto?,
         val datumBeginIkv: String?,
-        val datumEindIkv: String?
+        val datumEindIkv: String?,
     )
+
     data class InkomstenOpgave(
         val brutoSocialeVerzekeringsLoon: BigDecimal,
         val loonLbPremieVolksverzekering: BigDecimal,
@@ -36,8 +36,9 @@ data class UwvPersoonsIkvDto(
         var indRegelmatigArbeidspatroon: UwvCodesDto = UwvCodesDto(),
         var indLoonIsMedeAowAlleenstaande: UwvCodesDto = UwvCodesDto(),
         var indLoonInclusiefWajongUitkering: UwvCodesDto = UwvCodesDto(),
-        val naamRechtspersoon: String?
+        val naamRechtspersoon: String?,
     )
+
     data class InkomstenPeriode(
         val datumAanvangPeriode: LocalDate,
         val datumEindPeriode: LocalDate,
@@ -47,7 +48,6 @@ data class UwvPersoonsIkvDto(
         val indLoonheffingskortingToegepast: String,
         val indRegelmatigArbeidspatroon: String,
         val indLoonIsMedeAowAlleenstaande: String,
-        val indLoonInclusiefWajongUitkering: String
+        val indLoonInclusiefWajongUitkering: String,
     )
 }
-

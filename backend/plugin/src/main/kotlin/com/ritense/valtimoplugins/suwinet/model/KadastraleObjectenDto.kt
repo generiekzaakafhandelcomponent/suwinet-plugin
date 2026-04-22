@@ -13,7 +13,7 @@ data class KadastraleObjectenDto(
         val zakelijkRecht: ZakelijkRechtDto,
         val locatieOz: AdresDto?,
         val publiekrechtelijkeBeperking: List<PubliekrechtelijkeBeperkingDto?>,
-        val indicatieMeerGerechtigden: String
+        val indicatieMeerGerechtigden: String,
     ) {
         data class KadastraleAanduidingDto(
             val codeKadastraleGemeente: String,
@@ -22,16 +22,18 @@ data class KadastraleObjectenDto(
             val kadastraalPerceelnr: BigInteger,
             val volgnrKadastraalAppartementsrecht: BigInteger,
         )
+
         data class ZakelijkRechtDto(
             val omschrijvingZakelijkRecht: String,
             val datumEZakelijkRecht: String,
         )
+
         data class PubliekrechtelijkeBeperkingDto(
-            val aantekeningKadastraal: AantekeningKadastraalDto
+            val aantekeningKadastraal: AantekeningKadastraalDto,
         ) {
             data class AantekeningKadastraalDto(
                 val datumEAantekeningKadastraal: String,
-                val omschrijvingAantekeningKadastraal: String
+                val omschrijvingAantekeningKadastraal: String,
             )
         }
     }

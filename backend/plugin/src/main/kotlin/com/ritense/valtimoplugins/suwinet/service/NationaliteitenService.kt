@@ -6,7 +6,6 @@ import com.ritense.valtimoplugins.suwinet.model.brp.NationaliteitDto
 import org.springframework.core.io.ClassPathResource
 
 class NationaliteitenService {
-
     private var nationaliteiten: List<NationaliteitDto>
 
     init {
@@ -14,9 +13,7 @@ class NationaliteitenService {
         this.nationaliteiten = objectMapper.readValue(nationaliteitenTable.inputStream)
     }
 
-    fun getNationaliteit(code: String?): NationaliteitDto? {
-        return nationaliteiten.firstOrNull { it.code == code }
-    }
+    fun getNationaliteit(code: String?): NationaliteitDto? = nationaliteiten.firstOrNull { it.code == code }
 
     companion object {
         private val BRONDATA_NATIONALITEITEN_TABLE_JSON = "brondata/nationaliteiten_table.json"

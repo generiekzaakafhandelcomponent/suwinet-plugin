@@ -24,14 +24,17 @@ class SuwinetUwvPersoonsIkvService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
     private val dateTimeService: DateTimeService,
     private val uwvCodeService: UwvCodeService,
-    private val uwvSoortIkvService: UwvSoortIkvService
+    private val uwvSoortIkvService: UwvSoortIkvService,
 ) {
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
     private var maxPeriods by Delegates.notNull<Int>()
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String? = "",
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -44,66 +47,60 @@ class SuwinetUwvPersoonsIkvService(
         }
 
         return suwinetSOAPClient
+            .configureKeystore(soapClientConfig.keystoreCertificatePath, soapClientConfig.keystoreKey)
+            .configureTruststore(soapClientConfig.truststoreCertificatePath, soapClientConfig.truststoreKey)
+            .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<UWVIkvInfo>(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
             )
     }
 
     fun getUWVInkomstenInfoByBsn(
         bsn: String,
         uwvIkvInfoService: UWVIkvInfo,
-        maxPeriods: Int
+        maxPeriods: Int,
     ): UwvPersoonsIkvDto? {
-        logger.info { "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
         this.maxPeriods = maxPeriods
         try {
-            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo = objectFactory
-                .createUWVPersoonsIkvInfo()
-                .apply {
-                    burgerservicenr = bsn
-                }
+            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo =
+                objectFactory
+                    .createUWVPersoonsIkvInfo()
+                    .apply {
+                        burgerservicenr = bsn
+                    }
 
             val uwvPersoonsIkvInfoResponse: UWVPersoonsIkvInfoResponse =
                 uwvIkvInfoService.uwvPersoonsIkvInfo(uwvPersoonsIkvInfo)
             return uwvPersoonsIkvInfoResponse.unwrapResponse()
-
-            // SOAPFaultException occur when something is wrong with the request/response
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting UWV inkomsten info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
-            // WebServiceExceptions occur when the service is down
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting UWV inkomsten info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting UWV inkomsten info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         }
     }
 
     private fun UWVPersoonsIkvInfoResponse.unwrapResponse(): UwvPersoonsIkvDto? {
-
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
 
         return when (responseValue) {
-            is UWVPersoonsIkvInfoResponse.ClientSuwi -> UwvPersoonsIkvDto(
-                getInkomsten(responseValue.inkomstenverhouding)
-            )
+            is UWVPersoonsIkvInfoResponse.ClientSuwi ->
+                UwvPersoonsIkvDto(
+                    getInkomsten(responseValue.inkomstenverhouding),
+                )
 
             is FWI -> {
                 logger.info { "content: ${content[0].name}" }
@@ -126,48 +123,60 @@ class SuwinetUwvPersoonsIkvService(
             UwvPersoonsIkvDto.Inkomsten(
                 naamRechtspersoon = it.administratieveEenheid?.rechtspersoonAdministratieveEenh?.naamRechtspersoon,
                 loonheffingennummer = it.administratieveEenheid?.loonheffingennr,
-                straatadres = getAdres(it.administratieveEenheid?.feitelijkAdresAeh?.firstOrNull()?.straatadres),
-                cdSector = it.sectorRisicogroepIkv.firstOrNull()?.sectorBeroepsEnBedrijfsleven?.cdSector,
+                straatadres =
+                    getAdres(
+                        it.administratieveEenheid
+                            ?.feitelijkAdresAeh
+                            ?.firstOrNull()
+                            ?.straatadres,
+                    ),
+                cdSector =
+                    it.sectorRisicogroepIkv
+                        .firstOrNull()
+                        ?.sectorBeroepsEnBedrijfsleven
+                        ?.cdSector,
                 datumBeginIkv = dateTimeService.fromSuwinetToDateString(it.datBIkv),
                 datumEindIkv = dateTimeService.fromSuwinetToDateString(it.datEIkv),
-                opgaven = getInkomstenOpgaven(
-                    it.inkomstenopgave,
-                    getInkomstenPeriodes(it.inkomstenperiode),
-                    it.administratieveEenheid?.rechtspersoonAdministratieveEenh?.naamRechtspersoon
-                )
+                opgaven =
+                    getInkomstenOpgaven(
+                        it.inkomstenopgave,
+                        getInkomstenPeriodes(it.inkomstenperiode),
+                        it.administratieveEenheid?.rechtspersoonAdministratieveEenh?.naamRechtspersoon,
+                    ),
             )
         }
 
-    private fun getInkomstenPeriodes(inkomstenperiode: List<UWVPersoonsIkvInfoResponse.ClientSuwi.Inkomstenverhouding.Inkomstenperiode>) =
-        inkomstenperiode.map {
-            UwvPersoonsIkvDto.InkomstenPeriode(
-                datumAanvangPeriode = dateTimeService.toLocalDate(it.datBIkp, SUWINET_DATEIN_PATTERN),
-                datumEindPeriode = dateTimeService.toLocalDate(it.datEIkp, SUWINET_DATEIN_PATTERN),
-                codeSoortIkv = it.cdSrtIkv,
-                codeSoortArbeidscontract = it.cdTypeArbeidscontract ?: "-1",
-                codeAardIkv = it.cdAardIkv ?: "-1",
-                indLoonheffingskortingToegepast = it.indLoonheffingskortingToegepast ?: "-1",
-                indRegelmatigArbeidspatroon = it.indRegelmatigArbeidspatroon ?: "-1",
-                indLoonIsMedeAowAlleenstaande = it.indLoonIsMedeAowAlleenstaande ?: "-1",
-                indLoonInclusiefWajongUitkering = it.indLoonInclusiefWajongUitkering ?: "-1"
-            )
-        }
+    private fun getInkomstenPeriodes(
+        inkomstenperiode: List<UWVPersoonsIkvInfoResponse.ClientSuwi.Inkomstenverhouding.Inkomstenperiode>,
+    ) = inkomstenperiode.map {
+        UwvPersoonsIkvDto.InkomstenPeriode(
+            datumAanvangPeriode = dateTimeService.toLocalDate(it.datBIkp, SUWINET_DATEIN_PATTERN),
+            datumEindPeriode = dateTimeService.toLocalDate(it.datEIkp, SUWINET_DATEIN_PATTERN),
+            codeSoortIkv = it.cdSrtIkv,
+            codeSoortArbeidscontract = it.cdTypeArbeidscontract ?: "-1",
+            codeAardIkv = it.cdAardIkv ?: "-1",
+            indLoonheffingskortingToegepast = it.indLoonheffingskortingToegepast ?: "-1",
+            indRegelmatigArbeidspatroon = it.indRegelmatigArbeidspatroon ?: "-1",
+            indLoonIsMedeAowAlleenstaande = it.indLoonIsMedeAowAlleenstaande ?: "-1",
+            indLoonInclusiefWajongUitkering = it.indLoonInclusiefWajongUitkering ?: "-1",
+        )
+    }
 
-    private fun <T> selectMaxPeriods(
-        periods: List<T>
-    ) = periods.drop(if (periods.size - maxPeriods < 1) 0 else periods.size - maxPeriods)
-
+    private fun <T> selectMaxPeriods(periods: List<T>) =
+        periods.drop(if (periods.size - maxPeriods < 1) 0 else periods.size - maxPeriods)
 
     private fun getMatchingPeriod(
         inkomstenPeriodes: List<UwvPersoonsIkvDto.InkomstenPeriode>,
         datBIko: String,
-        datEIko: String
+        datEIko: String,
     ): UwvPersoonsIkvDto.InkomstenPeriode? {
         val start = dateTimeService.toLocalDate(datBIko, DATEIN_PATTERN)
         val end = dateTimeService.toLocalDate(datEIko, DATEIN_PATTERN)
         return inkomstenPeriodes.firstOrNull {
-            it.datumAanvangPeriode.isBefore(start) || it.datumAanvangPeriode.isEqual(start)
-                    && it.datumEindPeriode.isAfter(end) || it.datumEindPeriode.isEqual(end)
+            it.datumAanvangPeriode.isBefore(start) ||
+                it.datumAanvangPeriode.isEqual(start) &&
+                it.datumEindPeriode.isAfter(end) ||
+                it.datumEindPeriode.isEqual(end)
         }
     }
 
@@ -183,11 +192,11 @@ class SuwinetUwvPersoonsIkvService(
     private fun getInkomstenOpgaven(
         inkomstenopgaven: List<UWVPersoonsIkvInfoResponse.ClientSuwi.Inkomstenverhouding.Inkomstenopgave>,
         inkomstenPeriodes: List<UwvPersoonsIkvDto.InkomstenPeriode>,
-        naamRechtspersoon: String?
-    ) =
-        selectMaxPeriods(
-            inkomstenopgaven.map {
-                val opgave = UwvPersoonsIkvDto.InkomstenOpgave(
+        naamRechtspersoon: String?,
+    ) = selectMaxPeriods(
+        inkomstenopgaven.map {
+            val opgave =
+                UwvPersoonsIkvDto.InkomstenOpgave(
                     brutoSocialeVerzekeringsLoon = getWaarde(it.bedrBrutoloonSv),
                     loonLbPremieVolksverzekering = getWaarde(it.bedrLoonLbPremieVolksverz),
                     ingehoudenLbPremieVolksverzekering = getWaarde(it.bedrIngehoudenLbPremieVolksverz),
@@ -202,37 +211,37 @@ class SuwinetUwvPersoonsIkvService(
                     aantalSvDagen = it.aantSvDagenIko ?: -1,
                     naamRechtspersoon = naamRechtspersoon,
                 )
-                getMatchingPeriod(
-                    inkomstenPeriodes,
-                    opgave.datumAanvangOpgave,
-                    opgave.datumEindOpgave
-                )?.let { period ->
-                    opgave.codeAardIkv = uwvCodeService.getCodeArbeidsverhouding(period.codeAardIkv)
-                    opgave.codeSoortIkv = uwvSoortIkvService.getCodesoortInkomstenverhouding(period.codeSoortIkv)
-                    opgave.codeSoortArbeidscontract =
-                        uwvCodeService.getTypeArbeidscontract(period.codeSoortArbeidscontract)
-                    opgave.indLoonheffingskortingToegepast =
-                        uwvCodeService.getCodeJaNee(period.indLoonheffingskortingToegepast)
-                    opgave.indRegelmatigArbeidspatroon =
-                        uwvCodeService.getCodeJaNee(period.indRegelmatigArbeidspatroon)
-                    opgave.indLoonIsMedeAowAlleenstaande =
-                        uwvCodeService.getCodeJaNee(period.indLoonIsMedeAowAlleenstaande)
-                    opgave.indLoonInclusiefWajongUitkering =
-                        uwvCodeService.getCodeJaNee(period.indLoonInclusiefWajongUitkering)
-                }
-                opgave
+            getMatchingPeriod(
+                inkomstenPeriodes,
+                opgave.datumAanvangOpgave,
+                opgave.datumEindOpgave,
+            )?.let { period ->
+                opgave.codeAardIkv = uwvCodeService.getCodeArbeidsverhouding(period.codeAardIkv)
+                opgave.codeSoortIkv = uwvSoortIkvService.getCodesoortInkomstenverhouding(period.codeSoortIkv)
+                opgave.codeSoortArbeidscontract =
+                    uwvCodeService.getTypeArbeidscontract(period.codeSoortArbeidscontract)
+                opgave.indLoonheffingskortingToegepast =
+                    uwvCodeService.getCodeJaNee(period.indLoonheffingskortingToegepast)
+                opgave.indRegelmatigArbeidspatroon =
+                    uwvCodeService.getCodeJaNee(period.indRegelmatigArbeidspatroon)
+                opgave.indLoonIsMedeAowAlleenstaande =
+                    uwvCodeService.getCodeJaNee(period.indLoonIsMedeAowAlleenstaande)
+                opgave.indLoonInclusiefWajongUitkering =
+                    uwvCodeService.getCodeJaNee(period.indLoonInclusiefWajongUitkering)
             }
-
-        )
-
-    private fun getAdres(adres: Straatadres?) = AdresDto(
-        straatnaam = adres?.straatnaam ?: "",
-        huisnummer = adres?.huisnr?.toInt() ?: 0,
-        huisnummertoevoeging = adres?.huisnrtoevoeging ?: "",
-        postcode = adres?.postcd ?: "",
-        woonplaatsnaam = adres?.woonplaatsnaam ?: "",
-        locatieomschrijving = adres?.locatieoms ?: ""
+            opgave
+        },
     )
+
+    private fun getAdres(adres: Straatadres?) =
+        AdresDto(
+            straatnaam = adres?.straatnaam ?: "",
+            huisnummer = adres?.huisnr?.toInt() ?: 0,
+            huisnummertoevoeging = adres?.huisnrtoevoeging ?: "",
+            postcode = adres?.postcd ?: "",
+            woonplaatsnaam = adres?.woonplaatsnaam ?: "",
+            locatieomschrijving = adres?.locatieoms ?: "",
+        )
 
     companion object {
         const val SERVICE_PATH = "UWVDossierInkomstenGSD-v0200"

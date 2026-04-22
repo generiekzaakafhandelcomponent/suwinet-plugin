@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.ClientSuwiPersoonsInfo
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.FWI
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.KadasterInfo
@@ -26,14 +25,16 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class SuwinetKadasterInfoService(
-    private val suwinetSOAPClient: SuwinetSOAPClient
+    private val suwinetSOAPClient: SuwinetSOAPClient,
 ) {
-
     lateinit var kadasterService: KadasterInfo
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String? = "",
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -46,19 +47,23 @@ class SuwinetKadasterInfoService(
         }
 
         return suwinetSOAPClient
+            .configureKeystore(soapClientConfig.keystoreCertificatePath, soapClientConfig.keystoreKey)
+            .configureTruststore(soapClientConfig.truststoreCertificatePath, soapClientConfig.truststoreKey)
+            .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<KadasterInfo>(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
             )
     }
 
     fun getPersoonsinfoByBsn(
         bsn: String,
-        kadasterService: KadasterInfo
+        kadasterService: KadasterInfo,
     ): KadastraleObjectenDto {
-        logger.info { "Getting kadastrale objecten from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting kadastrale objecten from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
             this.kadasterService = kadasterService
@@ -66,27 +71,15 @@ class SuwinetKadasterInfoService(
             val kadastraleAanduidingen = retrieveKadasterPersoonsInfo(bsn)
 
             return getKadastraleObjects(kadastraleAanduidingen)
-
-            // SOAPFaultException occur when something is wrong with the request/response
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting kadastrale objecten" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
-            // WebServiceExceptions occur when the service is down
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting kadastrale objecten" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting kadastrale objecten" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         }
     }
 
@@ -94,29 +87,29 @@ class SuwinetKadasterInfoService(
         KadastraleObjectenDto(
             kadastraleAanduidingen.mapNotNull {
                 getKadastraalObjectByAanduiding(it)
-            }
+            },
         )
 
     private fun retrieveKadasterPersoonsInfo(bsn: String): List<KadastraleAanduiding> {
-        val persoonsInfoRequest = objectFactory
-            .createPersoonsInfo()
-            .apply {
-                burgerservicenr = bsn
-            }
+        val persoonsInfoRequest =
+            objectFactory
+                .createPersoonsInfo()
+                .apply {
+                    burgerservicenr = bsn
+                }
         val kadasterResponse = this.kadasterService.persoonsInfo(persoonsInfoRequest)
         return kadasterResponse.unwrapResponse()
     }
 
-    fun getKadastraalObjectByAanduiding(
-        kadastraleAanduiding: KadastraleAanduiding,
-    ) = try {
-        retrieveKadastraleObject(kadastraleAanduiding)?.let {
-            mapToKadasterObject(it)
+    fun getKadastraalObjectByAanduiding(kadastraleAanduiding: KadastraleAanduiding) =
+        try {
+            retrieveKadastraleObject(kadastraleAanduiding)?.let {
+                mapToKadasterObject(it)
+            }
+        } catch (e: Error) {
+            logger.error { "error retrieving: $e" }
+            null
         }
-    } catch (e: Error) {
-        logger.error { "error retrieving: $e" }
-        null
-    }
 
     private fun mapToKadasterObject(kadastraleObject: KadastraalObject) =
         KadastraleObjectenDto.KadastraalObjectDto(
@@ -126,8 +119,11 @@ class SuwinetKadasterInfoService(
             omschrijving = kadastraleObject.omsKadastraalObject,
             zakelijkRecht = mapZakelijkRecht(kadastraleObject.zakelijkRecht.firstOrNull()),
             locatieOz = mapLocatieOz(kadastraleObject.locatieOZ.firstOrNull()),
-            publiekrechtelijkeBeperking = listOf(mapPubliekrechtelijkeBeperking(kadastraleObject.publiekrechtelijkeBeperking.firstOrNull())),
-            indicatieMeerGerechtigden = kadastraleObject.indMeerGerechtigden
+            publiekrechtelijkeBeperking =
+                listOf(
+                    mapPubliekrechtelijkeBeperking(kadastraleObject.publiekrechtelijkeBeperking.firstOrNull()),
+                ),
+            indicatieMeerGerechtigden = kadastraleObject.indMeerGerechtigden,
         )
 
     private fun mapKadastraleAanduiding(aanduiding: KadastraleAanduiding) =
@@ -136,13 +132,13 @@ class SuwinetKadasterInfoService(
             kadastraleGemeentenaam = aanduiding.kadastraleGemeentenaam,
             kadastraleSectie = aanduiding.kadastraleSectie,
             kadastraalPerceelnr = aanduiding.kadastraalPerceelnr,
-            volgnrKadastraalAppartementsrecht = aanduiding.volgnrKadastraalAppartementsrecht
+            volgnrKadastraalAppartementsrecht = aanduiding.volgnrKadastraalAppartementsrecht,
         )
 
     private fun mapZakelijkRecht(zakelijkRecht: ZakelijkRecht?) =
         KadastraleObjectenDto.KadastraalObjectDto.ZakelijkRechtDto(
             omschrijvingZakelijkRecht = zakelijkRecht?.omsZakelijkRecht ?: "",
-            datumEZakelijkRecht = zakelijkRecht?.datEZakelijkRecht?.let { toDate(it) } ?: ""
+            datumEZakelijkRecht = zakelijkRecht?.datEZakelijkRecht?.let { toDate(it) } ?: "",
         )
 
     private fun mapLocatieOz(locatieOz: Locatie?) =
@@ -155,41 +151,45 @@ class SuwinetKadasterInfoService(
                 postcode = it.postcd,
                 woonplaatsnaam = it.woonplaatsnaam,
                 aanduidingBijHuisnummer = it.aanduidingBijHuisnr ?: "",
-                locatieomschrijving = it.locatieoms ?: ""
+                locatieomschrijving = it.locatieoms ?: "",
             )
         }
 
     private fun mapPubliekrechtelijkeBeperking(beperking: PubliekrechtelijkeBeperking?) =
         beperking?.aantekeningKadastraalObject?.let {
             KadastraleObjectenDto.KadastraalObjectDto.PubliekrechtelijkeBeperkingDto(
-                aantekeningKadastraal = KadastraleObjectenDto.KadastraalObjectDto.PubliekrechtelijkeBeperkingDto.AantekeningKadastraalDto(
-                    datumEAantekeningKadastraal = toDate(it.datEAantekeningKadastraalObject) ?: "",
-                    omschrijvingAantekeningKadastraal = it.omsAantekeningKadastraalObject ?: ""
-                )
+                aantekeningKadastraal =
+                    KadastraleObjectenDto.KadastraalObjectDto.PubliekrechtelijkeBeperkingDto.AantekeningKadastraalDto(
+                        datumEAantekeningKadastraal = toDate(it.datEAantekeningKadastraalObject) ?: "",
+                        omschrijvingAantekeningKadastraal = it.omsAantekeningKadastraalObject ?: "",
+                    ),
             )
         }
 
     private fun retrieveKadastraleObject(kadastraleAanduiding: KadastraleAanduiding): KadastraalObject? {
-        val infoKadastraleAanduidingRequest = objectFactory
-            .createObjectInfoKadastraleAanduiding()
-            .apply {
-                cdKadastraleGemeente = kadastraleAanduiding.cdKadastraleGemeente
-                kadastraleGemeentenaam = kadastraleAanduiding.kadastraleGemeentenaam
-                kadastraleSectie = kadastraleAanduiding.kadastraleSectie
-                kadastraalPerceelnr = kadastraleAanduiding.kadastraalPerceelnr
-                volgnrKadastraalAppartementsrecht = kadastraleAanduiding.volgnrKadastraalAppartementsrecht
-            }
-        val infoKadastraleAanduidingResponse = kadasterService.objectInfoKadastraleAanduiding(
-            infoKadastraleAanduidingRequest
-        )
+        val infoKadastraleAanduidingRequest =
+            objectFactory
+                .createObjectInfoKadastraleAanduiding()
+                .apply {
+                    cdKadastraleGemeente = kadastraleAanduiding.cdKadastraleGemeente
+                    kadastraleGemeentenaam = kadastraleAanduiding.kadastraleGemeentenaam
+                    kadastraleSectie = kadastraleAanduiding.kadastraleSectie
+                    kadastraalPerceelnr = kadastraleAanduiding.kadastraalPerceelnr
+                    volgnrKadastraalAppartementsrecht = kadastraleAanduiding.volgnrKadastraalAppartementsrecht
+                }
+        val infoKadastraleAanduidingResponse =
+            kadasterService.objectInfoKadastraleAanduiding(
+                infoKadastraleAanduidingRequest,
+            )
         return infoKadastraleAanduidingResponse.unwrapResponse()
     }
 
     private fun PersoonsInfoResponse.unwrapResponse(): List<KadastraleAanduiding> {
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("PersoonsInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("PersoonsInfoResponse contains no value")
 
         return when (responseValue) {
             is ClientSuwiPersoonsInfo -> {
@@ -210,10 +210,11 @@ class SuwinetKadasterInfoService(
     }
 
     private fun ObjectInfoKadastraleAanduidingResponse.unwrapResponse(): KadastraalObject? {
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("ObjectInfoKadastraleAanduidingResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("ObjectInfoKadastraleAanduidingResponse contains no value")
 
         return when (responseValue) {
             is KadastraalObject -> responseValue
@@ -230,6 +231,7 @@ class SuwinetKadasterInfoService(
     }
 
     private fun toDateString(date: LocalDate) = date.format(dateOutFormatter)
+
     private fun toDate(date: String) = toDateString(LocalDate.parse(date, dateInFormatter))
 
     companion object {

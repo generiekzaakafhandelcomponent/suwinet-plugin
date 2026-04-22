@@ -21,18 +21,20 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 const val SUWINET_DATE_PATTERN = "yyyyMMdd"
 const val SUWINET_TIME_PATTERN = "HHmmss00"
 
 class SuwinetRdwService(
-    private val suwinetSOAPClient: SuwinetSOAPClient
+    private val suwinetSOAPClient: SuwinetSOAPClient,
 ) {
     lateinit var rdwService: RDW
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String? = "",
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -45,56 +47,42 @@ class SuwinetRdwService(
         }
 
         return suwinetSOAPClient
+            .configureKeystore(soapClientConfig.keystoreCertificatePath, soapClientConfig.keystoreKey)
+            .configureTruststore(soapClientConfig.truststoreCertificatePath, soapClientConfig.truststoreKey)
+            .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<RDW>(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
             )
     }
 
     fun getVoertuigbezitInfoPersoonByBsn(
         bsn: String,
-        rdwService: RDW
+        rdwService: RDW,
     ): MotorvoertuigDto {
-
-        /* configure soap service */
         this.rdwService = rdwService
 
-        logger.info { "retrieving RDW Voertuigen info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "retrieving RDW Voertuigen info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         return try {
-            // retrieve voertuigen bezit by bsn
             val kentekens = retrieveVoertuigenBezitInfo(bsn)
-
-            // retrieve voertuigen details from kenteken list
             getVoertuigenDetails(kentekens)
-
-            // SOAPFaultException occur when something is wrong with the request/response
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting RDW voertuigen info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
-            // WebServiceExceptions occur when the service is down
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting RDW voertuigen info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting RDW voertuigen info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         }
     }
 
     private fun retrieveVoertuigenBezitInfo(bsn: String): List<String> {
-
         val voertuigbezitInfoPersoonRequest = objectFactory.createVoertuigbezitInfoPersoon()
         voertuigbezitInfoPersoonRequest.burgerservicenr = bsn
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
@@ -108,21 +96,20 @@ class SuwinetRdwService(
         MotorvoertuigDto(
             kentekens.mapNotNull {
                 getMotorvoertuigDetails(it)
-            }
+            },
         )
 
+    private fun getMotorvoertuigDetails(kenteken: String) =
+        try {
+            retrieveAansprakelijkeInfoFromSuwi(kenteken)?.let { mapToSimpleMotorvoertuig(it) }
+        } catch (e: Error) {
+            logger.error { "error retrieving: $e" }
+            null
+        }
 
-    private fun getMotorvoertuigDetails(
-        kenteken: String
-    ) = try {
-        retrieveAansprakelijkeInfoFromSuwi(kenteken)?.let { mapToSimpleMotorvoertuig(it) }
-    } catch (e: Error) {
-        logger.error { "error retrieving: $e" }
-        null
-    }
-
-    fun mapToSimpleMotorvoertuig(rdwAansprakelijke: KentekenInfoResponse.ClientSuwi.Aansprakelijke?): MotorvoertuigDto.Motorvoertuig {
-
+    fun mapToSimpleMotorvoertuig(
+        rdwAansprakelijke: KentekenInfoResponse.ClientSuwi.Aansprakelijke?,
+    ): MotorvoertuigDto.Motorvoertuig {
         val rdwVoertuig = rdwAansprakelijke?.voertuig
         val soortVoertuig = rdwVoertuig?.cdSrtVoertuig?.let { SoortVoertuig.findByCode(it) }
         val soortVoertuigNode = objectMapper.createObjectNode()
@@ -134,14 +121,13 @@ class SuwinetRdwService(
             merk = rdwVoertuig?.merkVoertuig ?: "",
             model = rdwVoertuig?.typeVoertuig ?: "",
             datumEersteInschrijving = rdwVoertuig?.datEersteInschrijvingVoertuigNat?.let { toDate(it) } ?: "",
-            datumRegistratieAansprakelijkheid = rdwAansprakelijke?.datRegistratieAansprakelijkheid?.let { toDate(it) }
-                ?: ""
+            datumRegistratieAansprakelijkheid =
+                rdwAansprakelijke?.datRegistratieAansprakelijkheid?.let { toDate(it) }
+                    ?: "",
         )
     }
 
-    private fun retrieveAansprakelijkeInfoFromSuwi(
-        kenteken: String
-    ): KentekenInfoResponse.ClientSuwi.Aansprakelijke? {
+    private fun retrieveAansprakelijkeInfoFromSuwi(kenteken: String): KentekenInfoResponse.ClientSuwi.Aansprakelijke? {
         val kentekenInfoRequest = createKentekenRequest(kenteken)
         val rdwResponse = rdwService.kentekenInfo(kentekenInfoRequest)
         var aansprakelijke: KentekenInfoResponse.ClientSuwi.Aansprakelijke? = null
@@ -149,9 +135,10 @@ class SuwinetRdwService(
             when (it) {
                 is KentekenInfoResponse.ClientSuwi -> aansprakelijke = it.aansprakelijke.firstOrNull()
                 is FWI -> {
-                    val msg = it.foutOrWaarschuwingOrInformatie.joinToString { melding ->
-                        "${melding.value.code}: ${melding.name} / ${melding.value}\n"
-                    }
+                    val msg =
+                        it.foutOrWaarschuwingOrInformatie.joinToString { melding ->
+                            "${melding.value.code}: ${melding.name} / ${melding.value}\n"
+                        }
                     logger.info { "FWI: $msg" }
                 }
             }
@@ -170,7 +157,6 @@ class SuwinetRdwService(
     }
 
     private fun KentekenInfoResponse.unwrapKentekenInfoResponse(): List<Any> {
-
         if (content.isNullOrEmpty()) {
             throw IllegalStateException("KentekenInfoResponse contains no value")
         }
@@ -187,22 +173,21 @@ class SuwinetRdwService(
         }
     }
 
-    private fun VoertuigbezitInfoPersoonResponse.unwrapResponse(): List<String> {
-
-        return if (!clientSuwi.isNullOrEmpty()) {
+    private fun VoertuigbezitInfoPersoonResponse.unwrapResponse(): List<String> =
+        if (!clientSuwi.isNullOrEmpty()) {
             clientSuwi[0].aansprakelijke.map {
                 it.voertuig.kentekenVoertuig
             }
         } else if (fwi != null) {
             throw SuwinetResultFWIException(
-                fwi.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" }
+                fwi.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" },
             )
         } else {
             listOf<String>()
         }
-    }
 
     private fun toDateString(date: LocalDate) = date.format(dateOutFormatter)
+
     private fun toDate(date: String) = toDateString(LocalDate.parse(date, dateInFormatter))
 
     companion object {

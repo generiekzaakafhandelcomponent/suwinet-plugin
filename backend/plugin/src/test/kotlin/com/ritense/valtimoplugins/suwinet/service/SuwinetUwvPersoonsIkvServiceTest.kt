@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.UWVDossierInkomstenGSD.UWVIkvInfo
@@ -54,12 +53,13 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         dateTimeService = DateTimeService()
         uwvCodeService = UwvCodeService()
         uwvSoortIkvService = UwvSoortIkvService()
-        suwinetUwvPersoonsIkvService = SuwinetUwvPersoonsIkvService(
-            suwinetSOAPClient,
-            dateTimeService,
-            uwvCodeService,
-            uwvSoortIkvService
-        )
+        suwinetUwvPersoonsIkvService =
+            SuwinetUwvPersoonsIkvService(
+                suwinetSOAPClient,
+                dateTimeService,
+                uwvCodeService,
+                uwvSoortIkvService,
+            )
         suwinetUwvPersoonsIkvService.setConfig(suwinetSOAPClientConfig, "")
     }
 
@@ -71,15 +71,16 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         // when
         whenever(uwvService.uwvPersoonsIkvInfo(any(UWVPersoonsIkvInfo::class.java))).thenReturn(
             testHelper.unmarshal<UWVPersoonsIkvInfoResponse>(
-                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_243000388.xml"
-            )
+                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_243000388.xml",
+            ),
         )
 
-        val result = suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
-            bsn,
-            uwvService,
-            3
-        )
+        val result =
+            suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
+                bsn,
+                uwvService,
+                3,
+            )
 
         // then
         assertEquals("found bsn should be equal", 1, result?.inkomsten?.size)
@@ -93,18 +94,35 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         // when
         whenever(uwvService.uwvPersoonsIkvInfo(any(UWVPersoonsIkvInfo::class.java))).thenReturn(
             testHelper.unmarshal<UWVPersoonsIkvInfoResponse>(
-                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_111111110.xml"
+                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_111111110.xml",
+            ),
+        )
+        val result =
+            suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
+                bsn,
+                uwvService,
+                maxPeriods,
             )
-        )
-        val result = suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
-            bsn,
-            uwvService,
-            maxPeriods
-        )
         // then
         assertEquals("found bsn should be equal", 2, result?.inkomsten?.size)
-        assertEquals("found opgaven should be equal to", 1, result?.inkomsten?.get(0)?.opgaven?.size)
-        assertEquals("found opgaven should be equal to", maxPeriods, result?.inkomsten?.get(1)?.opgaven?.size)
+        assertEquals(
+            "found opgaven should be equal to",
+            1,
+            result
+                ?.inkomsten
+                ?.get(0)
+                ?.opgaven
+                ?.size,
+        )
+        assertEquals(
+            "found opgaven should be equal to",
+            maxPeriods,
+            result
+                ?.inkomsten
+                ?.get(1)
+                ?.opgaven
+                ?.size,
+        )
     }
 
     @Test
@@ -115,17 +133,26 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         // when
         whenever(uwvService.uwvPersoonsIkvInfo(any(UWVPersoonsIkvInfo::class.java))).thenReturn(
             testHelper.unmarshal<UWVPersoonsIkvInfoResponse>(
-                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_243000388_1.xml"
+                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_243000388_1.xml",
+            ),
+        )
+        val result =
+            suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
+                bsn,
+                uwvService,
+                maxPeriods,
             )
-        )
-        val result = suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
-            bsn,
-            uwvService,
-            maxPeriods
-        )
         // then
         assertEquals("found bsn should be equal", 1, result?.inkomsten?.size)
-        assertEquals("found inkomsten opgaven should be equal", maxPeriods, result?.inkomsten?.get(0)?.opgaven?.size)
+        assertEquals(
+            "found inkomsten opgaven should be equal",
+            maxPeriods,
+            result
+                ?.inkomsten
+                ?.get(0)
+                ?.opgaven
+                ?.size,
+        )
     }
 
     @Test
@@ -136,15 +163,16 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         // when
         whenever(uwvService.uwvPersoonsIkvInfo(any(UWVPersoonsIkvInfo::class.java))).thenReturn(
             testHelper.unmarshal<UWVPersoonsIkvInfoResponse>(
-                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_444444440.xml"
-            )
+                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_444444440.xml",
+            ),
         )
 
-        val result = suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
-            bsn,
-            uwvService,
-            3
-        )
+        val result =
+            suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
+                bsn,
+                uwvService,
+                3,
+            )
         logger.info { "$result" }
         // then
         assertEquals("found bsn should be equal", 4, result?.inkomsten?.size)
@@ -162,15 +190,16 @@ internal class SuwinetUwvPersoonsIkvServiceTest : BaseTest() {
         // when
         whenever(uwvService.uwvPersoonsIkvInfo(any(UWVPersoonsIkvInfo::class.java))).thenReturn(
             testHelper.unmarshal<UWVPersoonsIkvInfoResponse>(
-                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_Nietsgevonden.xml"
-            )
+                "UWVDossierInkomstenGSD_UWVPersoonsIkvInfo_Nietsgevonden.xml",
+            ),
         )
 
-        val result = suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
-            bsn,
-            uwvService,
-            3
-        )
+        val result =
+            suwinetUwvPersoonsIkvService.getUWVInkomstenInfoByBsn(
+                bsn,
+                uwvService,
+                3,
+            )
 
         // then
         assertEquals("found uwv clientsuwi should be null", null, result)

@@ -4,8 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
-import com.ritense.valtimo.implementation.dkd.KadasterInfo.*
-
+import com.ritense.valtimo.implementation.dkd.KadasterInfo.KadasterInfo
+import com.ritense.valtimo.implementation.dkd.KadasterInfo.ObjectInfoKadastraleAanduiding
+import com.ritense.valtimo.implementation.dkd.KadasterInfo.ObjectInfoKadastraleAanduidingResponse
+import com.ritense.valtimo.implementation.dkd.KadasterInfo.PersoonsInfo
+import com.ritense.valtimo.implementation.dkd.KadasterInfo.PersoonsInfoResponse
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
@@ -47,6 +50,7 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         suwinetSOAPClient = Mockito.mock()
         suwinetKadasterInfoService.setConfig(suwinetSOAPClientConfig, "")
     }
+
     @Test
     fun `retrieving kadaster persoonsinfo with not found bsn should return empty list`() {
         // given
@@ -55,18 +59,20 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_Nietsgevonden.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_Nietsgevonden.xml",
+            ),
         )
 
-        val result = suwinetKadasterInfoService.getPersoonsinfoByBsn(
-            bsn,
-            kadasterService
-        )
+        val result =
+            suwinetKadasterInfoService.getPersoonsinfoByBsn(
+                bsn,
+                kadasterService,
+            )
 
         // then
         assertEquals("found kadastrale objecten should be empty", 0, result.onroerendeGoederen.size)
     }
+
     @Test
     fun `retrieving kadaster persoonsinfo should return only the found kadastrale objecten and skip the missing`() {
         // given
@@ -75,35 +81,35 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_111111110_object_nietgevonden.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_111111110_object_nietgevonden.xml",
+            ),
         )
 
         val param = ArgumentCaptor.forClass(ObjectInfoKadastraleAanduiding::class.java)
         whenever(
-            kadasterService.objectInfoKadastraleAanduiding(param.capture())
+            kadasterService.objectInfoKadastraleAanduiding(param.capture()),
         ).thenAnswer {
             val ka = it.arguments[0] as ObjectInfoKadastraleAanduiding
             testHelper.unmarshal<ObjectInfoKadastraleAanduidingResponse>(
-                "KadasterDossierGSD_ObjectInfoKadastraleAanduiding_${ka.cdKadastraleGemeente}_${ka.kadastraalPerceelnr}.xml"
+                "KadasterDossierGSD_ObjectInfoKadastraleAanduiding_${ka.cdKadastraleGemeente}_${ka.kadastraalPerceelnr}.xml",
             )
         }
-        val result = suwinetKadasterInfoService.getPersoonsinfoByBsn(
-            bsn,
-            kadasterService
-        )
+        val result =
+            suwinetKadasterInfoService.getPersoonsinfoByBsn(
+                bsn,
+                kadasterService,
+            )
 
         printResult(result)
         // then
         assertEquals("found kadastrale objecten should be 3", 3, result.onroerendeGoederen.size)
     }
 
-
     private fun printResult(result: KadastraleObjectenDto) {
         val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         val json = mapper.valueToTree<JsonNode>(result)
         val jout = mapper.writeValueAsString(json)
-        logger.info { "----- ${jout}" }
+        logger.info { "----- $jout" }
     }
 
     @Test
@@ -114,23 +120,24 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_111111110.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_111111110.xml",
+            ),
         )
 
         val param = ArgumentCaptor.forClass(ObjectInfoKadastraleAanduiding::class.java)
         whenever(
-            kadasterService.objectInfoKadastraleAanduiding(param.capture())
+            kadasterService.objectInfoKadastraleAanduiding(param.capture()),
         ).thenAnswer {
             val ka = it.arguments[0] as ObjectInfoKadastraleAanduiding
             testHelper.unmarshal<ObjectInfoKadastraleAanduidingResponse>(
-                "KadasterDossierGSD_ObjectInfoKadastraleAanduiding_${ka.cdKadastraleGemeente}_${ka.kadastraalPerceelnr}.xml"
+                "KadasterDossierGSD_ObjectInfoKadastraleAanduiding_${ka.cdKadastraleGemeente}_${ka.kadastraalPerceelnr}.xml",
             )
         }
-        val result = suwinetKadasterInfoService.getPersoonsinfoByBsn(
-            bsn,
-            kadasterService
-        )
+        val result =
+            suwinetKadasterInfoService.getPersoonsinfoByBsn(
+                bsn,
+                kadasterService,
+            )
 
         // then
         assertEquals("found kadastrale objecten should be 4", 4, result.onroerendeGoederen.size)

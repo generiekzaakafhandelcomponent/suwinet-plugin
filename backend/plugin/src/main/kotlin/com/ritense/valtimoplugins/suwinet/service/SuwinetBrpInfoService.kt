@@ -1,18 +1,17 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.AanvraagPersoonResponse
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.BRPInfo
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.ClientSuwi
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.FWI
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Huwelijk
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Kind
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Nationaliteit
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.ObjectFactory
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Straatadres
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.StraatadresHistorisch
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.VerblijfplaatsHistorisch
-import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Verblijfstitel
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.AanvraagPersoonResponse
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.BRPInfo
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.ClientSuwi
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.FWI
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Huwelijk
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Kind
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Nationaliteit
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.ObjectFactory
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Straatadres
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.StraatadresHistorisch
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.VerblijfplaatsHistorisch
+import com.ritense.valtimo.implementation.dkd.BRPDossierPersoonGSD.Verblijfstitel
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
 import com.ritense.valtimoplugins.suwinet.error.SuwinetError
@@ -33,13 +32,16 @@ import java.time.YearMonth
 class SuwinetBrpInfoService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
     private val nationaliteitenService: NationaliteitenService,
-    private val dateTimeService: DateTimeService
+    private val dateTimeService: DateTimeService,
 ) {
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String? = "",
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -52,24 +54,29 @@ class SuwinetBrpInfoService(
         }
 
         return suwinetSOAPClient
+            .configureKeystore(soapClientConfig.keystoreCertificatePath, soapClientConfig.keystoreKey)
+            .configureTruststore(soapClientConfig.truststoreCertificatePath, soapClientConfig.truststoreKey)
+            .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<BRPInfo>(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
             )
     }
 
     fun getPersoonsgegevensByBsn(
-        bsn: String, brpService: BRPInfo
+        bsn: String,
+        brpService: BRPInfo,
     ): PersoonDto? {
-
-        logger.info { "Getting BRP personal info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting BRP personal info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
-            val request = objectFactory.createRequest().apply {
-                burgerservicenr = bsn
-            }
+            val request =
+                objectFactory.createRequest().apply {
+                    burgerservicenr = bsn
+                }
             val person = brpService.aanvraagPersoon(request)
 
             return person.unwrapResponse()
@@ -79,26 +86,25 @@ class SuwinetBrpInfoService(
             logger.error(e) { "SOAPFaultException - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
             // WebServiceExceptions occur when the service is down
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         }
     }
 
     private fun AanvraagPersoonResponse.unwrapResponse(): PersoonDto? {
-
         val responseValue =
             content.firstOrNull() ?: throw IllegalStateException("AanvraagPersoonResponse contains no value")
 
@@ -121,28 +127,36 @@ class SuwinetBrpInfoService(
                     kinderenBsns = getKinderen(persoon.kind),
                     partnerBsn = getPartnerBsn(persoon.huwelijk),
                     datumOverlijden = dateTimeService.fromSuwinetToDateString(persoon.overlijden?.datOverlijden),
-                    codeBrpGegevensGeheim = persoon.cdBrpGegevensGeheim?.let {
-                        BrpGegevensGeheim.fromCode(persoon.cdBrpGegevensGeheim)
-                    },
+                    codeBrpGegevensGeheim =
+                        persoon.cdBrpGegevensGeheim?.let {
+                            BrpGegevensGeheim.fromCode(persoon.cdBrpGegevensGeheim)
+                        },
                     naamgebruik = persoon.aanduidingNaamgebruik,
                     geslachtsAanduiding = persoon.geslacht,
-                    geslachtsnaamPartner = persoon.huwelijk
-                        ?.firstOrNull()
-                        ?.takeIf { it.datOntbindingHuwelijk == null && it.datHuwelijkssluiting != null }?.partner
-                        ?.significantDeelVanDeAchternaam
-                        ?: "",
-                    ingangsdatumHuwelijk = dateTimeService.fromSuwinetToDateString(
+                    geslachtsnaamPartner =
                         persoon.huwelijk
                             ?.firstOrNull()
                             ?.takeIf { it.datOntbindingHuwelijk == null && it.datHuwelijkssluiting != null }
-                            ?.datHuwelijkssluiting
-                    )
+                            ?.partner
+                            ?.significantDeelVanDeAchternaam
+                            ?: "",
+                    ingangsdatumHuwelijk =
+                        dateTimeService.fromSuwinetToDateString(
+                            persoon.huwelijk
+                                ?.firstOrNull()
+                                ?.takeIf { it.datOntbindingHuwelijk == null && it.datHuwelijkssluiting != null }
+                                ?.datHuwelijkssluiting,
+                        ),
                 )
             }
 
             is FWI -> {
                 val fwiResponse = responseValue.value as FWI
-                throw SuwinetResultFWIException(fwiResponse.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" })
+                throw SuwinetResultFWIException(
+                    fwiResponse.foutOrWaarschuwingOrInformatie.joinToString {
+                        "${it.name} / ${it.value}\n"
+                    },
+                )
             }
 
             else -> {
@@ -156,39 +170,46 @@ class SuwinetBrpInfoService(
         }
     }
 
-    private fun getPartnerBsn(huwelijk: List<Huwelijk>) = if (huwelijk.isNotEmpty()) {
-        huwelijk[0].partner?.burgerservicenr ?: ""
-    } else {
-        ""
-    }
+    private fun getPartnerBsn(huwelijk: List<Huwelijk>) =
+        if (huwelijk.isNotEmpty()) {
+            huwelijk[0].partner?.burgerservicenr ?: ""
+        } else {
+            ""
+        }
 
     private fun getKinderen(kind: MutableList<Kind>) = kind.mapNotNull { it.burgerservicenr }
 
-
-    private fun getNationaliteiten(nationaliteiten: List<Nationaliteit>) = nationaliteiten.mapNotNull {
-        nationaliteitenService.getNationaliteit(
-            it.cdNationaliteit?.trimStart('0')
-        )?.let { nationaliteit ->
-            NationaliteitDto(
-                nationaliteit.code, nationaliteit.name
-            )
-        } ?: it.cdNationaliteit?.let { code ->
-            NationaliteitDto(
-                "0", "Onbekend"
-            )
+    private fun getNationaliteiten(nationaliteiten: List<Nationaliteit>) =
+        nationaliteiten.mapNotNull {
+            nationaliteitenService
+                .getNationaliteit(
+                    it.cdNationaliteit?.trimStart('0'),
+                )?.let { nationaliteit ->
+                    NationaliteitDto(
+                        nationaliteit.code,
+                        nationaliteit.name,
+                    )
+                } ?: it.cdNationaliteit?.let { code ->
+                NationaliteitDto(
+                    "0",
+                    "Onbekend",
+                )
+            }
         }
-    }
 
-    private fun getVerblijfstitel(verblijfstitel: Verblijfstitel?) = PersoonDto.Verblijfstitel(
-        codeVerblijfstitel = PersoonDto.Verblijfstitel.CodeVerblijfstitel(
-            verblijfstitel?.cdVerblijfstitel ?: "-1", ""
-        ),
-        datumAanvangVerblijfstitel = dateTimeService.fromSuwinetToDateString(verblijfstitel?.datBVerblijfstitel),
-        datumEindeVerblijfstitel = dateTimeService.fromSuwinetToDateString(verblijfstitel?.datEVerblijfstitel)
-    )
+    private fun getVerblijfstitel(verblijfstitel: Verblijfstitel?) =
+        PersoonDto.Verblijfstitel(
+            codeVerblijfstitel =
+                PersoonDto.Verblijfstitel.CodeVerblijfstitel(
+                    verblijfstitel?.cdVerblijfstitel ?: "-1",
+                    "",
+                ),
+            datumAanvangVerblijfstitel = dateTimeService.fromSuwinetToDateString(verblijfstitel?.datBVerblijfstitel),
+            datumEindeVerblijfstitel = dateTimeService.fromSuwinetToDateString(verblijfstitel?.datEVerblijfstitel),
+        )
 
     private fun getVerblijfplaatsHistorisch(
-        verblijfplaatsHistorisch: List<VerblijfplaatsHistorisch>?
+        verblijfplaatsHistorisch: List<VerblijfplaatsHistorisch>?,
     ): List<PersoonDto.VerblijfplaatsHistorisch> {
         if (verblijfplaatsHistorisch.isNullOrEmpty()) return emptyList()
 
@@ -206,8 +227,8 @@ class SuwinetBrpInfoService(
                         PersoonDto.VerblijfplaatsHistorisch(
                             type = AdresType.WOONADRES,
                             adres = domicilieAdres.mapToAdresDto(),
-                            datumBeginAdreshouding = datumBeginAdreshouding
-                        )
+                            datumBeginAdreshouding = datumBeginAdreshouding,
+                        ),
                     )
                 }
                 entry.correspondentieadres?.let { correspondentieadres ->
@@ -215,35 +236,37 @@ class SuwinetBrpInfoService(
                         PersoonDto.VerblijfplaatsHistorisch(
                             type = AdresType.POSTADRES,
                             adres = correspondentieadres.mapToAdresDto(),
-                            datumBeginAdreshouding = datumBeginAdreshouding
-                        )
+                            datumBeginAdreshouding = datumBeginAdreshouding,
+                        ),
                     )
                 }
             }
         }
     }
 
-    private fun Straatadres.mapToAdresDto() = AdresDto(
-        straatnaam = straatnaam.orEmpty(),
-        huisnummer = huisnr?.toInt() ?: 0,
-        huisletter = huisletter.orEmpty(),
-        huisnummertoevoeging = huisnrtoevoeging.orEmpty(),
-        postcode = postcd.orEmpty(),
-        woonplaatsnaam = woonplaatsnaam.orEmpty(),
-        aanduidingBijHuisnummer = aanduidingBijHuisnr.orEmpty(),
-        locatieomschrijving = locatieoms.orEmpty()
-    )
+    private fun Straatadres.mapToAdresDto() =
+        AdresDto(
+            straatnaam = straatnaam.orEmpty(),
+            huisnummer = huisnr?.toInt() ?: 0,
+            huisletter = huisletter.orEmpty(),
+            huisnummertoevoeging = huisnrtoevoeging.orEmpty(),
+            postcode = postcd.orEmpty(),
+            woonplaatsnaam = woonplaatsnaam.orEmpty(),
+            aanduidingBijHuisnummer = aanduidingBijHuisnr.orEmpty(),
+            locatieomschrijving = locatieoms.orEmpty(),
+        )
 
-    private fun StraatadresHistorisch.mapToAdresDto() = AdresDto(
-        straatnaam = straatnaam.orEmpty(),
-        huisnummer = huisnr?.toInt() ?: 0,
-        huisletter = huisletter.orEmpty(),
-        huisnummertoevoeging = huisnrtoevoeging.orEmpty(),
-        postcode = postcd.orEmpty(),
-        woonplaatsnaam = woonplaatsnaam.orEmpty(),
-        aanduidingBijHuisnummer = aanduidingBijHuisnr.orEmpty(),
-        locatieomschrijving = locatieoms.orEmpty()
-    )
+    private fun StraatadresHistorisch.mapToAdresDto() =
+        AdresDto(
+            straatnaam = straatnaam.orEmpty(),
+            huisnummer = huisnr?.toInt() ?: 0,
+            huisletter = huisletter.orEmpty(),
+            huisnummertoevoeging = huisnrtoevoeging.orEmpty(),
+            postcode = postcd.orEmpty(),
+            woonplaatsnaam = woonplaatsnaam.orEmpty(),
+            aanduidingBijHuisnummer = aanduidingBijHuisnr.orEmpty(),
+            locatieomschrijving = locatieoms.orEmpty(),
+        )
 
     private fun parseSuwinetDateOrNull(raw: String?): LocalDate? {
         val digits = raw?.filter(Char::isDigit) ?: return null
@@ -251,14 +274,17 @@ class SuwinetBrpInfoService(
 
         val year = digits.substring(0, 4).toInt()
         val month = digits.substring(4, 6).let { if (it == "00") 1 else it.toInt() }
-        val day = digits.substring(6, 8).let { if (it == "00") 1 else it.toInt() }
-            .coerceIn(1, YearMonth.of(year, month).lengthOfMonth())
+        val day =
+            digits
+                .substring(6, 8)
+                .let { if (it == "00") 1 else it.toInt() }
+                .coerceIn(1, YearMonth.of(year, month).lengthOfMonth())
 
         return LocalDate.of(year, month, day)
     }
 
     companion object {
-        const val SERVICE_PATH = "BRPDossierPersoonGSD-v0200"
+        const val SERVICE_PATH = "BRPDossierPersoonGSD-v0200/v1"
         private val objectFactory = ObjectFactory()
         private val logger = KotlinLogging.logger {}
     }

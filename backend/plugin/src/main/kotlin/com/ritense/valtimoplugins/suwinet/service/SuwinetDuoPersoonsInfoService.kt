@@ -18,14 +18,16 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class SuwinetDuoPersoonsInfoService(
-    private val suwinetSOAPClient: SuwinetSOAPClient
+    private val suwinetSOAPClient: SuwinetSOAPClient,
 ) {
-
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String? = "",
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -37,85 +39,82 @@ class SuwinetDuoPersoonsInfoService(
             completeUrl = completeUrl.plus(suffix)
         }
         return suwinetSOAPClient
+            .configureKeystore(soapClientConfig.keystoreCertificatePath, soapClientConfig.keystoreKey)
+            .configureTruststore(soapClientConfig.truststoreCertificatePath, soapClientConfig.truststoreKey)
+            .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<DUOInfo>(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
             )
     }
 
     fun getPersoonsInfoByBsn(
         bsn: String,
-        duoInfo: DUOInfo
+        duoInfo: DUOInfo,
     ): DuoPersoonsInfoDto {
-        logger.info { "Getting duo persoons Onderwijsovereenkomst from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting duo persoons Onderwijsovereenkomst from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
-            val persoonsInfoRequest = objectFactory
-                .createDUOPersoonsInfo()
-                .apply {
-                    burgerservicenr = bsn
-                }
+            val persoonsInfoRequest =
+                objectFactory
+                    .createDUOPersoonsInfo()
+                    .apply {
+                        burgerservicenr = bsn
+                    }
             val response = duoInfo.duoPersoonsInfo(persoonsInfoRequest)
             return response.unwrapResponse(bsn)
-
-            // SOAPFaultException occur when something is wrong with the request/response
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting DUO personal info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
-            // WebServiceExceptions occur when the service is down
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting DUO personal info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting DUO personal info" }
-            throw SuwinetError(
-                e,
-                "SUWINET_CONNECT_ERROR"
-            )
+            throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
         }
     }
 
-    private fun getOnderwijsOvereenkomsten(onderwijsovereenkomst: List<DUOPersoonsInfoResponse.ClientSuwi.Onderwijsovereenkomst>): List<DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst> {
-        return onderwijsovereenkomst.map {
+    private fun getOnderwijsOvereenkomsten(
+        onderwijsovereenkomst: List<DUOPersoonsInfoResponse.ClientSuwi.Onderwijsovereenkomst>,
+    ): List<DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst> =
+        onderwijsovereenkomst.map {
             DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst(
                 it.brin.get(0).brinNr,
                 it.datInschrijvingOpleiding ?: "",
                 it.datUitschrijvingOpleiding ?: "",
-                getDeelnameOpleidingen(it.deelnameOpleidingGeregistrDuo)
+                getDeelnameOpleidingen(it.deelnameOpleidingGeregistrDuo),
             )
         }
-    }
 
-    private fun getResultaatOpleidingGeregistrDuo(resultaatOpleiding: List<DUOPersoonsInfoResponse.ClientSuwi.ResultaatOpleidingGeregistrDuo>): List<DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo> {
-        return resultaatOpleiding.map {
+    private fun getResultaatOpleidingGeregistrDuo(
+        resultaatOpleiding: List<DUOPersoonsInfoResponse.ClientSuwi.ResultaatOpleidingGeregistrDuo>,
+    ): List<DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo> =
+        resultaatOpleiding.map {
             DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo(
                 codeFaseOpleidingDuo = it.cdFaseOpleidingDuo ?: "",
-                inhoudResultaatOpleidingDuo = DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo.InhoudResultaatOpleidingDuo(
-                    codeNiveauOpleidingDuo = it.inhoudResultaatOpleidingDuo.cdNiveauOpleidingDuo ?: "",
-                    naamOpleidingKortDuo = it.inhoudResultaatOpleidingDuo.naamOpleidingKortDuo ?: "",
-                ),
-                resultaatExamen = DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo.ResultaatExamen(
-                    datumResultaatExamen = toDate(it.resultaatExamen.datResultaatExamen),
-                    codeResultaatExamen = it.resultaatExamen.cdResultaatExamen ?: "",
-                ),
+                inhoudResultaatOpleidingDuo =
+                    DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo.InhoudResultaatOpleidingDuo(
+                        codeNiveauOpleidingDuo = it.inhoudResultaatOpleidingDuo.cdNiveauOpleidingDuo ?: "",
+                        naamOpleidingKortDuo = it.inhoudResultaatOpleidingDuo.naamOpleidingKortDuo ?: "",
+                    ),
+                resultaatExamen =
+                    DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo.ResultaatExamen(
+                        datumResultaatExamen = toDate(it.resultaatExamen.datResultaatExamen),
+                        codeResultaatExamen = it.resultaatExamen.cdResultaatExamen ?: "",
+                    ),
             )
         }
-    }
 
     private fun DUOPersoonsInfoResponse.unwrapResponse(bsn: String): DuoPersoonsInfoDto {
-
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("DUOPersoonsInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("DUOPersoonsInfoResponse contains no value")
 
         return when (responseValue) {
             is DUOPersoonsInfoResponse.ClientSuwi -> {
@@ -123,13 +122,13 @@ class SuwinetDuoPersoonsInfoService(
                     responseValue.burgerservicenr,
                     responseValue.indStartkwalificatieDuo ?: "",
                     getOnderwijsOvereenkomsten(responseValue.onderwijsovereenkomst),
-                    getResultaatOpleidingGeregistrDuo(responseValue.resultaatOpleidingGeregistrDuo)
+                    getResultaatOpleidingGeregistrDuo(responseValue.resultaatOpleidingGeregistrDuo),
                 )
             }
 
             is FWI -> {
                 throw SuwinetResultFWIException(
-                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" }
+                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" },
                 )
             }
 
@@ -149,12 +148,13 @@ class SuwinetDuoPersoonsInfoService(
             bsn,
             "",
             listOf<DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst>(),
-            listOf<DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo>()
+            listOf<DuoPersoonsInfoDto.ResultaatOpleidingGeregistrDuo>(),
         )
 
-    private fun getDeelnameOpleidingen(deelnames: List<DUOPersoonsInfoResponse.ClientSuwi.Onderwijsovereenkomst.DeelnameOpleidingGeregistrDuo>): List<DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst.DeelnameOpleidingGeregistrDuo> {
-
-        return deelnames.map {
+    private fun getDeelnameOpleidingen(
+        deelnames: List<DUOPersoonsInfoResponse.ClientSuwi.Onderwijsovereenkomst.DeelnameOpleidingGeregistrDuo>,
+    ): List<DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst.DeelnameOpleidingGeregistrDuo> =
+        deelnames.map {
             DuoPersoonsInfoDto.DuoOnderwijsOvereenkomst.DeelnameOpleidingGeregistrDuo(
                 it.datBDeelnameOpleiding ?: "",
                 it.datEDeelnameOpleiding ?: "",
@@ -168,20 +168,20 @@ class SuwinetDuoPersoonsInfoService(
                     it.inhoudDeelnameOpleidingDuo.omsStudiegebied ?: "",
                     it.inhoudDeelnameOpleidingDuo.omsStudieinhoud ?: "",
                     it.inhoudDeelnameOpleidingDuo.omsStudieuitstroom ?: "",
-                )
+                ),
             )
         }
-    }
 
     private fun toDateString(date: LocalDate) = date.format(dateOutFormatter)
+
     private fun toDate(date: String) = toDateString(LocalDate.parse(date, dateInFormatter))
 
     companion object {
         private const val SERVICE_PATH = "DUODossierPersoonGSD-v0300"
-        private const val suwinetDateInPattern = "yyyyMMdd"
-        private val dateInFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(suwinetDateInPattern)
-        private const val bbzDateOutPattern = "yyyy-MM-dd"
-        private val dateOutFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(bbzDateOutPattern)
+        private const val SUWINET_DATE_IN_PATTERN = "yyyyMMdd"
+        private val dateInFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(SUWINET_DATE_IN_PATTERN)
+        private const val BBZ_DATE_OUT_PATTERN = "yyyy-MM-dd"
+        private val dateOutFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(BBZ_DATE_OUT_PATTERN)
         private val objectFactory = ObjectFactory()
         private val logger = KotlinLogging.logger {}
     }

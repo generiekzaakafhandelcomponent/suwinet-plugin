@@ -53,7 +53,7 @@ internal class SuwinetRdwServiceTest : BaseTest() {
         // given
         val bsn = "111111110"
         val kentekenMh74dz = "MH74DZ"
-        val kentekenZdlx16 = "16ZDLX"
+        val kenteken16zdlx = "16ZDLX"
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
             testHelper.unmarshal<VoertuigbezitInfoPersoonResponse>(
@@ -73,7 +73,7 @@ internal class SuwinetRdwServiceTest : BaseTest() {
         // then
         assertEquals("found motorvoertuigen should be 2", result.motorVoertuigen.size, 2)
         assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kentekenMh74dz)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kentekenZdlx16)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kenteken16zdlx)
     }
 
     @Test
@@ -94,12 +94,13 @@ internal class SuwinetRdwServiceTest : BaseTest() {
     }
 
     @Test
-    fun `retrieving voertuig bezit with 3 voertuigen from RDW with second details call kenteken not found`() {
+    @Suppress("ktlint:standard:max-line-length")
+    fun `retrieving voertuig bezit with 3 voertuigen from RDW with second details call kenteken not found to Motorvoertuigen lijst in doc`() {
         // given
         val bsn = "111111110"
         val kentekenMh74dz = "MH74DZ"
         val kentekenAa00bb = "ONBEKE"
-        val kentekenZdlx16 = "16ZDLX"
+        val kenteken16zdlx = "16ZDLX"
 
         // when
         whenever(rdwService.voertuigbezitInfoPersoon(any())).thenReturn(
@@ -125,11 +126,12 @@ internal class SuwinetRdwServiceTest : BaseTest() {
         assertEquals("found motorvoertuigen should be 3", result.motorVoertuigen.size, 3)
         assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[0].kenteken, kentekenMh74dz)
         assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[1].kenteken, kentekenAa00bb)
-        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[2].kenteken, kentekenZdlx16)
+        assertEquals("found motorvoertuig should have kenteken", result.motorVoertuigen[2].kenteken, kenteken16zdlx)
     }
 
     @Test
-    fun `happy flow retrieving voertuig bezit and details with 1 voertuig from RDW suwinet`() {
+    @Suppress("ktlint:standard:max-line-length")
+    fun `happy flow retrieving voertuig bezit and details with 1 voertuig from RDW suwinet to Motorvoertuigen lijst in doc`() {
         // given
         val bsn = "444444440"
         val kenteken = "MH74DZ"

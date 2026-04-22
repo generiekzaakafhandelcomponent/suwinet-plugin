@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.svbdossierpersoongsd.SVBInfo
@@ -21,9 +20,8 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
-
-//private const val suwinetDateInPattern = "yyyyMMdd"
-//private val dateInFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(suwinetDateInPattern)
+// private const val suwinetDateInPattern = "yyyyMMdd"
+// private val dateInFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(suwinetDateInPattern)
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetSvbInfoServiceTest : BaseTest() {
@@ -62,20 +60,22 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_111111110.xml"
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_111111110.xml",
+            ),
+        )
+        val codeUitkeringsperiode =
+            CodesUitkeringsperiodeDto(
+                "6",
+                "maand",
             )
-        )
-        val codeUitkeringsperiode = CodesUitkeringsperiodeDto(
-            "6",
-            "maand"
-        )
         whenever(codesUitkeringsperiodeService.getCodesUitkeringsperiode("6")).thenReturn(codeUitkeringsperiode)
 
-        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-            bsn,
-            svbInfo,
-            3
-        )
+        val result =
+            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+                bsn,
+                svbInfo,
+                3,
+            )
         logger.info { "$result" }
         assertEquals("found svb bsn should be contain 2 uitkeringen", 2, result?.svbUitkeringen?.size)
         val aow = result?.svbUitkeringen?.first { it.codeSzWet == "AOW" }
@@ -92,14 +92,15 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_444444440.xml"
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_444444440.xml",
+            ),
+        )
+        val result =
+            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+                bsn,
+                svbInfo,
+                2,
             )
-        )
-        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-            bsn,
-            svbInfo,
-            2
-        )
         // then
         assertEquals("found svb bsn should be contain 1 uitkering", 1, result?.svbUitkeringen?.size)
         val aow = result?.svbUitkeringen?.first { it.codeSzWet == "AOW" }
@@ -114,15 +115,16 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_Nietsgevonden.xml"
-            )
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_Nietsgevonden.xml",
+            ),
         )
 
-        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-            bsn,
-            svbInfo,
-            3
-        )
+        val result =
+            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+                bsn,
+                svbInfo,
+                3,
+            )
         // then
         assertEquals("no uitkeringen not found", null, result)
     }
@@ -137,5 +139,4 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
 //        }
 //    }
 //
-
 }

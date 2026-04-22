@@ -1,8 +1,6 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.TestHelper
-
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.duodossierstudiefinancieringgsd.DUOInfo
 import com.ritense.valtimoplugins.dkd.duodossierstudiefinancieringgsd.DUOStudiefinancieringInfo
@@ -20,10 +18,8 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
-
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
-
     @Mock
     lateinit var duoInfoService: DUOInfo
 
@@ -53,13 +49,14 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml"
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml",
+            ),
+        )
+        val result =
+            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+                bsn,
+                duoInfoService,
             )
-        )
-        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-            bsn,
-            duoInfoService
-        )
         // then
         assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
         assertEquals("found studiefinancieringen should be 5", result.studiefinancieringen.size, 5)
@@ -73,16 +70,16 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml"
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml",
+            ),
+        )
+        val result =
+            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+                bsn,
+                duoInfoService,
             )
-        )
-        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-            bsn,
-            duoInfoService
-        )
 
         // then
         assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
     }
-
 }

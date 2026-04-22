@@ -1,4 +1,4 @@
-rootProject.name = "gzac-plugin-template"
+rootProject.name = "suwinet-plugin"
 include(
     "backend",
     "backend:app",
