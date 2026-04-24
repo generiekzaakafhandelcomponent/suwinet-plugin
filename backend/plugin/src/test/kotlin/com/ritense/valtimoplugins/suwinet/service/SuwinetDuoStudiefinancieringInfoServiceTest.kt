@@ -1,5 +1,7 @@
 package com.ritense.valtimoplugins.suwinet.service
 
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.duodossierstudiefinancieringgsd.DUOInfo
@@ -7,9 +9,9 @@ import com.ritense.valtimoplugins.dkd.duodossierstudiefinancieringgsd.DUOStudief
 import com.ritense.valtimoplugins.dkd.duodossierstudiefinancieringgsd.DUOStudiefinancieringInfoResponse
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
+import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
@@ -20,6 +22,7 @@ import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
+
     @Mock
     lateinit var duoInfoService: DUOInfo
 
@@ -29,8 +32,7 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
     @Mock
     lateinit var suwinetSOAPClientConfig: SuwinetSOAPClientConfig
 
-    @InjectMocks
-    lateinit var suwinetDuoStudiefinancieringInfoService: SuwinetDuoStudiefinancieringInfoService
+    private lateinit var suwinetDuoStudiefinancieringInfoService: SuwinetDuoStudiefinancieringInfoService
 
     lateinit var testHelper: TestHelper
 
@@ -38,6 +40,8 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
     fun setup() {
         testHelper = TestHelper
         suwinetSOAPClient = mock()
+        val dynamicResponseFactory = DynamicResponseFactory(jacksonObjectMapper())
+        suwinetDuoStudiefinancieringInfoService = SuwinetDuoStudiefinancieringInfoService(suwinetSOAPClient, dynamicResponseFactory)
         suwinetDuoStudiefinancieringInfoService.setConfig(suwinetSOAPClientConfig, "")
     }
 
@@ -49,17 +53,19 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml",
-            ),
-        )
-        val result =
-            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-                bsn,
-                duoInfoService,
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml"
             )
+        )
+        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+            bsn,
+            duoInfoService,
+            dynamicProperties = listOf("*")
+        )
         // then
-        assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
-        assertEquals("found studiefinancieringen should be 5", result.studiefinancieringen.size, 5)
+        val r = result.dynamicProperties as Map<*, *>
+        assertEquals("found bsn should be equal to input parameter", bsn, r["burgerservicenr"])
+        val studiefinancieringen = r["studiefinanciering"] as List<*>
+        assertEquals("found studiefinancieringen should be 5", 5, studiefinancieringen.size)
     }
 
     @Test
@@ -70,16 +76,16 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml",
-            ),
-        )
-        val result =
-            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-                bsn,
-                duoInfoService,
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml"
             )
+        )
+        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+            bsn,
+            duoInfoService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found bsn should be equal to input parameter", result.burgerservicenummer, bsn)
+        assertEquals("result should have no properties when not found", true, result.properties.isEmpty())
     }
 }

@@ -7,13 +7,10 @@ import com.ritense.document.domain.Document
 import com.ritense.document.service.DocumentService
 
 class SuwinetDocumentWriterService(
-    private val documentService: DocumentService,
+    private val documentService: DocumentService
 ) {
-    fun writeValueToDocumentAtPath(
-        targetValue: Any,
-        targetPath: String,
-        documentId: String,
-    ) {
+
+    fun writeValueToDocumentAtPath(targetValue: Any, targetPath: String, documentId: String) {
         val document = getDocumentById(documentId)
         val valueNode = jacksonObjectMapper().valueToTree<JsonNode>(targetValue)
         val jsonPatch = buildJsonPatchWithObjectNodeAtPath(valueNode, targetPath)
@@ -21,10 +18,7 @@ class SuwinetDocumentWriterService(
         runWithoutAuthorization { documentService.modifyDocument(document, jsonPatch) }
     }
 
-    private fun buildJsonPatchWithObjectNodeAtPath(
-        jsonObject: JsonNode,
-        targetPath: String,
-    ): JsonNode {
+    private fun buildJsonPatchWithObjectNodeAtPath(jsonObject: JsonNode, targetPath: String): JsonNode {
         val sanitizedPath = removeRootSlashFromPathString(targetPath)
         val pathKeyNames = sanitizedPath.split("/")
         val pathIterator = pathKeyNames.iterator()
@@ -42,11 +36,11 @@ class SuwinetDocumentWriterService(
         return rootNode
     }
 
-    private fun removeRootSlashFromPathString(targetPath: String): String =
-        if (!targetPath.startsWith("/")) targetPath else targetPath.substring(1)
+    private fun removeRootSlashFromPathString(targetPath: String): String {
+        return if (!targetPath.startsWith("/")) targetPath else targetPath.substring(1)
+    }
 
-    private fun getDocumentById(businessKey: String): Document =
-        runWithoutAuthorization {
-            documentService.get(businessKey)
-        }
+    private fun getDocumentById(businessKey: String): Document {
+        return runWithoutAuthorization { documentService.get(businessKey) }
+    }
 }

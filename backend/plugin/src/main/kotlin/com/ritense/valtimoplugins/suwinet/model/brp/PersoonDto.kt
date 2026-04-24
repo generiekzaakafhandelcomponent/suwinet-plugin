@@ -16,30 +16,36 @@ data class PersoonDto(
     val verblijfplaatsHistorisch: List<VerblijfplaatsHistorisch>,
     val nationaliteiten: List<NationaliteitDto>?,
     @JsonInclude(JsonInclude.Include.NON_NULL) val kinderenBsns: List<String>?,
+
     val partnerBsn: String? = "",
     val geslachtsnaamPartner: String? = "",
     val ingangsdatumHuwelijk: String? = "",
+
     val datumOverlijden: String? = "",
-    val codeBrpGegevensGeheim: BrpGegevensGeheim?,
+
+    val codeBrpGegevensGeheim:  BrpGegevensGeheim?,
     val anummer: String? = "",
+
     val naamgebruik: String? = "",
     val geslachtsAanduiding: String? = "",
-) {
+
+    val propertiesMap: Map<String, Any?> = mapOf(),
+    val properties: List<String> = listOf()
+    ){
     data class Verblijfstitel(
         val codeVerblijfstitel: CodeVerblijfstitel,
         val datumAanvangVerblijfstitel: String,
-        val datumEindeVerblijfstitel: String,
+        val datumEindeVerblijfstitel: String
     ) {
         data class CodeVerblijfstitel(
             val code: String,
-            val name: String,
+            val name: String
         )
     }
-
     data class VerblijfplaatsHistorisch(
         val type: AdresType,
         @JsonInclude(JsonInclude.Include.NON_NULL)
         val adres: AdresDto?,
-        val datumBeginAdreshouding: String,
+        val datumBeginAdreshouding: String
     )
 }

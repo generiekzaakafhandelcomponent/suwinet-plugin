@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
+import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.AanvraagPersoonResponse
 import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.BRPInfo
 import com.ritense.valtimoplugins.dkd.brpdossierpersoongsd.Request
-import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
-import com.ritense.valtimoplugins.suwinet.model.brp.NationaliteitDto
-import com.ritense.valtimoplugins.suwinet.model.brp.PersoonDto
+import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
+import com.ritense.valtimoplugins.suwinet.model.DynamicResponseDto
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.test.junit5.JUnit5Asserter.assertEquals
+
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetBrpInfoServiceTest : BaseTest() {
@@ -37,22 +38,16 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
     @Mock
     lateinit var suwinetSOAPClientConfig: SuwinetSOAPClientConfig
 
-    @Mock
-    lateinit var nationaliteitenService: NationaliteitenService
-
     private lateinit var suwinetBrpInfoService: SuwinetBrpInfoService
 
     lateinit var testHelper: TestHelper
 
-    lateinit var dateTimeService: DateTimeService
-
     @BeforeEach
     fun setup() {
         testHelper = TestHelper
-        dateTimeService = DateTimeService()
         suwinetSOAPClient = Mockito.mock()
-        nationaliteitenService = Mockito.mock()
-        suwinetBrpInfoService = SuwinetBrpInfoService(suwinetSOAPClient, nationaliteitenService, dateTimeService)
+        val dynamicResponseFactory = DynamicResponseFactory(jacksonObjectMapper())
+        suwinetBrpInfoService = SuwinetBrpInfoService(suwinetSOAPClient, dynamicResponseFactory)
         suwinetBrpInfoService.setConfig(suwinetSOAPClientConfig, "")
     }
 
@@ -64,23 +59,24 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture()),
+            brpService.aanvraagPersoon(paramBrpInfo.capture())
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
             )
         }
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp person kind size should be 4", 4, result?.kinderenBsns?.size)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        assertEquals("found brp person kind size should be 4", 4, (r["kind"] as List<*>).size)
         printResult(result)
     }
 
@@ -88,52 +84,31 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
     fun `retrieving BRP Aanvraag should return brp clientsuwi 111111110 with 5 nationalities`() {
         // given
         val bsn = "111111110"
-        val cdNationaliteit1 = "0001".trimStart('0')
-        val cdNationaliteit2 = "0002".trimStart('0')
-        val cdNationaliteit3 = "0013".trimStart('0')
-        val cdNationaliteit4 = "144".trimStart('0')
-        val cdNationaliteit5 = "0175".trimStart('0')
+        val cdNationaliteit1 = "0001"
 
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture()),
+            brpService.aanvraagPersoon(paramBrpInfo.capture())
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
             )
         }
-        val nationaliteitDto1 = NationaliteitDto(cdNationaliteit1, "Nederland")
-        val nationaliteitDto2 = NationaliteitDto(cdNationaliteit2, "Behandeld als Nederlander")
-        val nationaliteitDtoOnbekend = NationaliteitDto(cdNationaliteit3, "Onbekend")
-        val nationaliteitDto4 = NationaliteitDto(cdNationaliteit4, "Burger van Sáo Tomé en Principe")
 
-        whenever(nationaliteitenService.getNationaliteit(cdNationaliteit1)).thenReturn(nationaliteitDto1)
-        whenever(nationaliteitenService.getNationaliteit(cdNationaliteit2)).thenReturn(nationaliteitDto2)
-        whenever(nationaliteitenService.getNationaliteit(cdNationaliteit3)).thenReturn(nationaliteitDtoOnbekend)
-        whenever(nationaliteitenService.getNationaliteit(cdNationaliteit4)).thenReturn(nationaliteitDto4)
-        whenever(nationaliteitenService.getNationaliteit(cdNationaliteit5)).thenReturn(nationaliteitDtoOnbekend)
-
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp person nationaliteiten size should be 5", 5, result?.nationaliteiten?.size)
-        assertEquals(
-            "found brp person nationaliteiten size should be nationality Nederland",
-            nationaliteitDto1,
-            result?.nationaliteiten?.get(0),
-        )
-        assertEquals(
-            "found brp person nationaliteiten size should be an unknown nationality",
-            nationaliteitDtoOnbekend,
-            result?.nationaliteiten?.get(4),
-        )
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        val nationaliteit = r["nationaliteit"] as List<*>
+        assertEquals("found brp person nationaliteiten size should be 5", 5, nationaliteit.size)
+        assertEquals("first nationaliteit cdNationaliteit should be 0001", cdNationaliteit1, (nationaliteit[0] as Map<*, *>)["cdNationaliteit"])
         printResult(result)
     }
 
@@ -145,58 +120,53 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture()),
+            brpService.aanvraagPersoon(paramBrpInfo.capture())
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
             )
         }
-        val nationaliteitCode = "1"
-        val nationaliteitDto = NationaliteitDto("1", "Nederland")
 
-        whenever(nationaliteitenService.getNationaliteit(nationaliteitCode)).thenReturn(nationaliteitDto)
-
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp person nationaliteiten size should be 1", 1, result?.nationaliteiten?.size)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        assertEquals("found brp person nationaliteiten size should be 2", 2, (r["nationaliteit"] as List<*>).size)
         printResult(result)
     }
 
     @Test
-    fun `retrieving BRP Aanvraag should return brp clientsuwi 231001230 with 1 nationality`() {
+    fun `retrieving BRP Aanvraag should return brp clientsuwi 231001230 with 2 nationality`() {
         // given
         val bsn = "231001230"
-        val nationaliteitCode1 = "1"
-        val nationaliteitDto1 = NationaliteitDto(nationaliteitCode1, "Nederland")
-        whenever(nationaliteitenService.getNationaliteit(nationaliteitCode1)).thenReturn(nationaliteitDto1)
 
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture()),
+            brpService.aanvraagPersoon(paramBrpInfo.capture())
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
             )
         }
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp expected nationalities: 1", 1, result?.nationaliteiten?.size)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        assertEquals("found brp expected nationalities: 2", 2, (r["nationaliteit"] as List<*>).size)
         printResult(result)
     }
 
@@ -209,23 +179,26 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture()),
+            brpService.aanvraagPersoon(paramBrpInfo.capture())
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
             )
         }
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
 
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp partner bsn should be $partnerBsn", partnerBsn, result?.partnerBsn)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        val huwelijk = r["huwelijk"] as List<*>
+        val partner = (huwelijk[0] as Map<*, *>)["partner"] as Map<*, *>
+        assertEquals("found brp partner bsn should be $partnerBsn", partnerBsn, partner["burgerservicenr"])
     }
 
     @Test
@@ -236,18 +209,18 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         whenever(brpService.aanvraagPersoon(any(Request::class.java))).thenReturn(
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_$bsn.xml",
-            ),
+                "BRPDossierPersoonGSD_AanvraagPersoon_${bsn}.xml"
+            )
         )
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        //      printResult(result)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
     }
 
     @Test
@@ -258,18 +231,23 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         whenever(brpService.aanvraagPersoon(any(Request::class.java))).thenReturn(
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_444444440.xml",
-            ),
+                "BRPDossierPersoonGSD_AanvraagPersoon_444444440.xml"
+            )
         )
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp bsn should be as input", "", result?.partnerBsn)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        val huwelijk = r["huwelijk"] as? List<*>
+        val partnerBsn = huwelijk?.firstOrNull()
+            ?.let { (it as Map<*, *>)["partner"] as? Map<*, *> }
+            ?.get("burgerservicenr")
+        assertEquals("found brp bsn without partner should have empty partner bsn", true, partnerBsn == null || partnerBsn == "")
         printResult(result)
     }
 
@@ -281,26 +259,28 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         whenever(brpService.aanvraagPersoon(any(Request::class.java))).thenReturn(
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_444444440.xml",
-            ),
+                "BRPDossierPersoonGSD_AanvraagPersoon_444444440.xml"
+            )
         )
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
         // then
-        assertEquals("found brp bsn should be as input", bsn, result?.bsn)
-        assertEquals("found brp person kind size should be 0", 0, result?.kinderenBsns?.size)
+        val r = result?.dynamicProperties as Map<*, *>
+        assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
+        val kind = r["kind"] as? List<*>
+        assertEquals("found brp person kind size should be 0", 0, kind?.size ?: 0)
         printResult(result)
     }
 
-    private fun printResult(result: PersoonDto?) {
+    private fun printResult(result: DynamicResponseDto?) {
         val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         val json = mapper.valueToTree<JsonNode>(result)
         val jout = mapper.writeValueAsString(json)
-        logger.info { "----- $jout" }
+        logger.info { "----- ${jout}" }
     }
 
     @Test
@@ -311,15 +291,15 @@ internal class SuwinetBrpInfoServiceTest : BaseTest() {
         // when
         whenever(brpService.aanvraagPersoon(any(Request::class.java))).thenReturn(
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_Nietsgevonden.xml",
-            ),
+                "BRPDossierPersoonGSD_AanvraagPersoon_Nietsgevonden.xml"
+            )
         )
 
-        val result =
-            suwinetBrpInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                brpService,
-            )
+        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            brpService,
+            dynamicProperties = listOf("*")
+        )
         // then
         assertEquals("person not found", null, result)
     }

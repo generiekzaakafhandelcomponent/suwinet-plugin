@@ -6,6 +6,7 @@ import com.ritense.valtimoplugins.suwinet.model.UwvCodesDto
 import org.springframework.core.io.ClassPathResource
 
 class UwvCodeService {
+
     private var arbeidsverhoudingCodes: List<UwvCodesDto>
     private var typeArbeidscontractCodes: List<UwvCodesDto>
     private var jaNeeCodes: List<UwvCodesDto>
@@ -19,20 +20,17 @@ class UwvCodeService {
         this.jaNeeCodes = objectMapper.readValue(codesJaNeeTable.inputStream)
     }
 
-    fun getCodeArbeidsverhouding(code: String): UwvCodesDto =
-        arbeidsverhoudingCodes.firstOrNull {
-            it.code == code
-        } ?: UwvCodesDto(code, "not found")
+    fun getCodeArbeidsverhouding(code: String): UwvCodesDto {
+        return arbeidsverhoudingCodes.firstOrNull{ it.code == code }?:UwvCodesDto(code, "not found")
+    }
 
-    fun getTypeArbeidscontract(code: String): UwvCodesDto =
-        typeArbeidscontractCodes.firstOrNull {
-            it.code == code
-        } ?: UwvCodesDto(code, "not found")
+    fun getTypeArbeidscontract(code: String): UwvCodesDto {
+        return typeArbeidscontractCodes.firstOrNull{ it.code == code }?:UwvCodesDto(code, "not found")
+    }
 
-    fun getCodeJaNee(code: String): UwvCodesDto =
-        jaNeeCodes.firstOrNull {
-            it.code == code
-        } ?: UwvCodesDto(code, "not found")
+    fun getCodeJaNee(code: String): UwvCodesDto {
+        return jaNeeCodes.firstOrNull{ it.code == code }?:UwvCodesDto(code, "not found")
+    }
 
     companion object {
         private val CODE_AARD_ARBEIDSVERHOUDING_TABLE = "brondata/codes_aard_arbeidsverhouding.json"
