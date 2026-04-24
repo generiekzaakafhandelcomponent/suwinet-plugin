@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
@@ -23,7 +22,6 @@ import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
-
     @Mock
     lateinit var duoInfoService: DUOInfo
 
@@ -54,14 +52,15 @@ internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoPersoonsInfo(any(DUOPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOPersoonsInfoResponse>(
-                "DUODossierPersoonGSD_DUOPersoonsInfo_999991954.xml"
+                "DUODossierPersoonGSD_DUOPersoonsInfo_999991954.xml",
+            ),
+        )
+        val result =
+            suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
+                bsn,
+                duoInfoService,
+                dynamicProperties = listOf("*"),
             )
-        )
-        val result = suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
-            bsn,
-            duoInfoService,
-            dynamicProperties = listOf("*")
-        )
 
         // then
         val r = result?.dynamicProperties as Map<*, *>
@@ -80,14 +79,15 @@ internal class SuwinetDuoPersoonsInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoPersoonsInfo(any(DUOPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOPersoonsInfoResponse>(
-                "DUOPersoonsInfoResponse_Nietsgevonden.xml"
+                "DUOPersoonsInfoResponse_Nietsgevonden.xml",
+            ),
+        )
+        val result =
+            suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
+                bsn,
+                duoInfoService,
+                dynamicProperties = listOf("*"),
             )
-        )
-        val result = suwinetDuoPersoonsInfoService.getPersoonsInfoByBsn(
-            bsn,
-            duoInfoService,
-            dynamicProperties = listOf("*")
-        )
 
         // then
         assertNull(result, "result should be null when not found")

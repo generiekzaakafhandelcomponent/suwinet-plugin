@@ -6,17 +6,20 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 class DateTimeService {
-
-    fun getDifferenceInMilliseconds(from: String, to: String): Long =
-        ZonedDateTime.parse(to).toInstant().toEpochMilli() - ZonedDateTime.parse(from).toInstant().toEpochMilli()
+    fun getDifferenceInMilliseconds(
+        from: String,
+        to: String,
+    ): Long = ZonedDateTime.parse(to).toInstant().toEpochMilli() - ZonedDateTime.parse(from).toInstant().toEpochMilli()
 
     fun getCurrentTimeStamp(): String {
         val dateTimeFormatter = DateTimeFormatter.ISO_INSTANT
         return ZonedDateTime.now().format(dateTimeFormatter)
     }
 
-    fun toLocalDate(date: String, pattern: String) =
-        LocalDate.parse(date, DateTimeFormatter.ofPattern(pattern))
+    fun toLocalDate(
+        date: String,
+        pattern: String,
+    ) = LocalDate.parse(date, DateTimeFormatter.ofPattern(pattern))
 
     fun fromSuwinetToDateString(dateIn: String?) =
         try {
@@ -25,7 +28,10 @@ class DateTimeService {
             if (dateIn.isNullOrEmpty()) "" else dateIn
         }
 
-    fun getYearFromDateString(dateIn: String, pattern: String) = toLocalDate(dateIn, pattern).year
+    fun getYearFromDateString(
+        dateIn: String,
+        pattern: String,
+    ) = toLocalDate(dateIn, pattern).year
 
     fun getDayMonthFullYearPatternDate(timeStamp: String): String {
         val dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")

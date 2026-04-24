@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {BrpKinderenInfoConfig} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'brp-partner-info',
     templateUrl: './brp-kinderen-info.component.html',
     styleUrls: ['./brp-kinderen-info.component.scss'],

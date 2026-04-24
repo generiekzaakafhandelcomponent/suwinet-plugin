@@ -5,14 +5,15 @@ import java.math.BigDecimal
 data class UitkeringenDto(
     val svbUitkeringen: List<Uitkering>,
     val propertiesMap: Map<String, Any?> = mapOf(),
-    val properties: List<String> = listOf()
+    val properties: List<String> = listOf(),
 ) {
     data class Uitkering(
         val codeSzWet: String,
         val datumBeginUitkeringsverhouding: String,
         val datumEindUitkeringsverhouding: String,
-        val periodes: List<UitkeringPeriode>
+        val periodes: List<UitkeringPeriode>,
     )
+
     data class UitkeringPeriode(
         val brutoBedrag: BigDecimal,
         val nettoBedrag: BigDecimal,
@@ -20,7 +21,6 @@ data class UitkeringenDto(
         val datumEindUitkeringsperiode: String,
         val codeUitkeringsperiode: CodesUitkeringsperiodeDto?,
         val codeMunteenheid: String,
-        val codeSzWet: String
+        val codeSzWet: String,
     )
 }
-

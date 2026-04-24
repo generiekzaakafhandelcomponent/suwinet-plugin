@@ -5,14 +5,18 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
-class DynamicResponseFactory(val objectMapper: ObjectMapper) {
-
+class DynamicResponseFactory(
+    val objectMapper: ObjectMapper,
+) {
     fun toMap(obj: Any): Map<String, Any?> {
         @Suppress("UNCHECKED_CAST")
         return objectMapper.convertValue(obj, Map::class.java) as Map<String, Any?>
     }
 
-    fun toFlatMap(obj: Any, prefix: String = ""): Map<String, Any?> {
+    fun toFlatMap(
+        obj: Any,
+        prefix: String = "",
+    ): Map<String, Any?> {
         if (obj is List<*>) {
             val result = mutableMapOf<String, Any?>()
             obj.forEachIndexed { index, item ->
@@ -29,18 +33,25 @@ class DynamicResponseFactory(val objectMapper: ObjectMapper) {
         return flattenMap(nestedMap, prefix)
     }
 
-    private fun convertN8DateToIso(key: String, value: String): String {
+    private fun convertN8DateToIso(
+        key: String,
+        value: String,
+    ): String {
         if (!key.contains("dat", ignoreCase = true)) return value
         if (!value.matches(Regex("^\\d{8}$"))) return value
         return try {
-            LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyyMMdd"))
+            LocalDate
+                .parse(value, DateTimeFormatter.ofPattern("yyyyMMdd"))
                 .format(DateTimeFormatter.ISO_LOCAL_DATE)
         } catch (e: DateTimeParseException) {
             value
         }
     }
 
-    private fun flattenMap(map: Map<*, *>, prefix: String): Map<String, Any?> {
+    private fun flattenMap(
+        map: Map<*, *>,
+        prefix: String,
+    ): Map<String, Any?> {
         val result = mutableMapOf<String, Any?>()
 
         map.forEach { (key, value) ->
@@ -69,11 +80,12 @@ class DynamicResponseFactory(val objectMapper: ObjectMapper) {
     fun flatMapToNested(flatMap: Map<String, Any?>): Any {
         val parsedEntries = flatMap.map { (key, value) -> parseKeyParts(key) to value }
 
-        val root: Any = if (parsedEntries.all { (parts, _) -> parts.firstOrNull() is Int }) {
-            mutableListOf<Any?>()
-        } else {
-            mutableMapOf<String, Any?>()
-        }
+        val root: Any =
+            if (parsedEntries.all { (parts, _) -> parts.firstOrNull() is Int }) {
+                mutableListOf<Any?>()
+            } else {
+                mutableMapOf<String, Any?>()
+            }
 
         parsedEntries.forEach { (parts, value) ->
             setNestedValue(root, parts, 0, value)
@@ -100,7 +112,12 @@ class DynamicResponseFactory(val objectMapper: ObjectMapper) {
         return parts
     }
 
-    private fun setNestedValue(container: Any, parts: List<Any>, index: Int, value: Any?) {
+    private fun setNestedValue(
+        container: Any,
+        parts: List<Any>,
+        index: Int,
+        value: Any?,
+    ) {
         if (index > parts.lastIndex) return
         val part = parts[index]
         val isLast = index == parts.lastIndex
@@ -114,9 +131,10 @@ class DynamicResponseFactory(val objectMapper: ObjectMapper) {
                 if (isLast) {
                     map[mapKey] = value
                 } else {
-                    val child = map.getOrPut(mapKey) {
-                        if (nextPart is Int) mutableListOf<Any?>() else mutableMapOf<String, Any?>()
-                    }
+                    val child =
+                        map.getOrPut(mapKey) {
+                            if (nextPart is Int) mutableListOf<Any?>() else mutableMapOf<String, Any?>()
+                        }
                     setNestedValue(child!!, parts, index + 1, value)
                 }
             }

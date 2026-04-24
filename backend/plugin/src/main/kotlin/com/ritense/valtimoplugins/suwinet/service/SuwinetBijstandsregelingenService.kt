@@ -16,13 +16,16 @@ import org.springframework.util.StringUtils
 
 class SuwinetBijstandsregelingenService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -40,7 +43,8 @@ class SuwinetBijstandsregelingenService(
             .configureBasicAuth(soapClientConfig.basicAuthName, soapClientConfig.basicAuthSecret)
             .getService<BijstandsregelingenInfo>(
                 completeUrl,
-                soapClientConfig.connectionTimeout, soapClientConfig.receiveTimeout,
+                soapClientConfig.connectionTimeout,
+                soapClientConfig.receiveTimeout,
             )
     }
 
@@ -49,16 +53,21 @@ class SuwinetBijstandsregelingenService(
         infoService: BijstandsregelingenInfo,
         dynamicProperties: List<String>,
     ): DynamicResponseDto? {
-        logger.info { "Getting Bijstandsregelingen from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
-
-        val result = runCatching {
-            val bijstandsregelingenInfoRequest = ObjectFactory().createBijstandsregelingenInfo_Type()
-                .apply {
-                    burgerservicenr = bsn
-                }
-            val response = infoService.bijstandsregelingenInfo(bijstandsregelingenInfoRequest)
-            response.unwrapResponse(dynamicProperties)
+        logger.info {
+            "Getting Bijstandsregelingen from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
         }
+
+        val result =
+            runCatching {
+                val bijstandsregelingenInfoRequest =
+                    ObjectFactory()
+                        .createBijstandsregelingenInfo_Type()
+                        .apply {
+                            burgerservicenr = bsn
+                        }
+                val response = infoService.bijstandsregelingenInfo(bijstandsregelingenInfoRequest)
+                response.unwrapResponse(dynamicProperties)
+            }
 
         return result.getOrThrow()
     }
@@ -72,13 +81,17 @@ class SuwinetBijstandsregelingenService(
                 val bijstandsRegelingenInfo = responseValue.value as ClientSuwi
                 DynamicResponseDto(
                     properties = getAvailableProperties(bijstandsRegelingenInfo),
-                    dynamicProperties = getDynamicProperties(bijstandsRegelingenInfo, dynamicProperties)
+                    dynamicProperties = getDynamicProperties(bijstandsRegelingenInfo, dynamicProperties),
                 )
             }
 
             is FWI -> {
                 val fwiResponse = responseValue.value as FWI
-                throw SuwinetResultFWIException(fwiResponse.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" })
+                throw SuwinetResultFWIException(
+                    fwiResponse.foutOrWaarschuwingOrInformatie.joinToString {
+                        "${it.name} / ${it.value}\n"
+                    },
+                )
             }
 
             else -> {
@@ -92,10 +105,12 @@ class SuwinetBijstandsregelingenService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> =
-        dynamicResponseFactory.toFlatMap(info).keys.toList()
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
         dynamicProperties.forEach { prop ->

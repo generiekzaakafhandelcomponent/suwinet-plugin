@@ -6,14 +6,45 @@
         "formDefinitionName": "suwinet-brp-ophalen.start"
     },
     {
-        "activityId": "get-brp-persoonsgegevens",
+        "activityId": "Activity_08qadpi",
         "activityType": "bpmn:ServiceTask:start",
         "processLinkType": "plugin",
         "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
         "pluginActionDefinitionKey": "get-brp-persoonsgegevens",
         "actionProperties": {
             "bsn": "doc:/gegevensVanuitAanvraag/persoon/bsn",
-            "resultProcessVariableName": "brpPersoonsgegevensInfo"
+            "resultProcessVariableName": "brpPersoonsgegevensInfo",
+            "dynamicProperties": [
+                "*"
+            ]
+        }
+    },
+    {
+        "activityId": "Activity_15dfru2",
+        "activityType": "bpmn:ServiceTask:start",
+        "processLinkType": "plugin",
+        "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+        "pluginActionDefinitionKey": "get-brp-partner-persoonsgegevens",
+        "actionProperties": {
+            "bsn": "pv:partnerBsn",
+            "resultProcessVariableName": "brpPersoonsgegevensPartnerInfo",
+            "dynamicProperties": [
+                "*"
+            ]
+        }
+    },
+    {
+        "activityId": "Activity_0407tm5",
+        "activityType": "bpmn:ServiceTask:start",
+        "processLinkType": "plugin",
+        "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+        "pluginActionDefinitionKey": "get-brp-kinderen-persoonsgegevens",
+        "actionProperties": {
+            "kinderenBsns": "pv:kinderenBsns",
+            "resultProcessVariableName": "brpPersoonsgegevensKinderenInfo",
+            "dynamicProperties": [
+                "*"
+            ]
         }
     }
 ]

@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {BrpPersoonInfoConfig} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'brp-persoon-info',
     templateUrl: './brp-persoon-info.component.html',
     styleUrls: ['./brp-persoon-info.component.scss'],

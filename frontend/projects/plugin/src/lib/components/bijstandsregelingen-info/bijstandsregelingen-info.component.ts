@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take, tap
 import {BijstandsRegelingenInfoConfig} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'bijstandsregelingen-info',
     templateUrl: './bijstandsregelingen-info.component.html',
     styleUrls: ['./bijstandsregelingen-info.component.scss'],

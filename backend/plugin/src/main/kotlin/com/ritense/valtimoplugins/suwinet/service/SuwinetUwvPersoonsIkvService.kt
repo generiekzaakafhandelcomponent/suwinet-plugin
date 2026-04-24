@@ -18,13 +18,16 @@ import org.springframework.util.StringUtils
 
 class SuwinetUwvPersoonsIkvService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -50,20 +53,22 @@ class SuwinetUwvPersoonsIkvService(
     fun getUWVInkomstenInfoByBsn(
         bsn: String,
         uwvIkvInfoService: UWVIkvInfo,
-        dynamicProperties: List<String> = listOf()
+        dynamicProperties: List<String> = listOf(),
     ): DynamicResponseDto? {
-        logger.info { "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
         try {
-            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo = objectFactory
-                .createUWVPersoonsIkvInfo()
-                .apply {
-                    burgerservicenr = bsn
-                }
+            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo =
+                objectFactory
+                    .createUWVPersoonsIkvInfo()
+                    .apply {
+                        burgerservicenr = bsn
+                    }
 
             val uwvPersoonsIkvInfoResponse: UWVPersoonsIkvInfoResponse =
                 uwvIkvInfoService.uwvPersoonsIkvInfo(uwvPersoonsIkvInfo)
             return uwvPersoonsIkvInfoResponse.unwrapResponse(dynamicProperties)
-
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting UWV inkomsten info" }
             throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
@@ -77,16 +82,18 @@ class SuwinetUwvPersoonsIkvService(
     }
 
     private fun UWVPersoonsIkvInfoResponse.unwrapResponse(dynamicProperties: List<String>): DynamicResponseDto? {
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
 
         return when (responseValue) {
-            is UWVPersoonsIkvInfoResponse.ClientSuwi -> DynamicResponseDto(
-                properties = getAvailableProperties(responseValue),
-                dynamicProperties = getDynamicProperties(responseValue, dynamicProperties)
-            )
+            is UWVPersoonsIkvInfoResponse.ClientSuwi ->
+                DynamicResponseDto(
+                    properties = getAvailableProperties(responseValue),
+                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties),
+                )
 
             is FWI -> {
                 logger.info { "content: ${content[0].name}" }
@@ -104,11 +111,12 @@ class SuwinetUwvPersoonsIkvService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> {
-        return dynamicResponseFactory.toFlatMap(info).keys.toList()
-    }
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
 

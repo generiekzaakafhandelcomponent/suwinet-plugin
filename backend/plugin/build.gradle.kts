@@ -44,7 +44,7 @@ dockerCompose {
     isRequiredBy(project.tasks.integrationTesting)
 
     tasks.integrationTesting {
-        useComposeFiles.addAll("$rootDir/docker-resources/docker-compose-base-test.yml", "docker-compose-override.yml")
+        useComposeFiles.addAll("$rootDir/docker-resources/docker-compose-base-test.yml")
     }
 }
 
@@ -91,31 +91,26 @@ dependencies {
     implementation("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:$apacheCxfVersion")
     implementation("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:$apacheCxfVersion")
 
-    // Testing - compileOnly deps needed at test time
-    testImplementation("com.ritense.valtimoplugins:suwinet-auth:$suwinetAuthVersion")
-    testImplementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+    // Testing
+    testImplementation("com.ritense.valtimo:building-block")
     testImplementation("com.ritense.valtimo:contract")
     testImplementation("com.ritense.valtimo:core")
+    testImplementation("com.ritense.valtimo:plugin")
+    testImplementation("com.ritense.valtimo:temporary-resource-storage")
+    testImplementation("com.ritense.valtimo:test-utils-common")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    testImplementation("org.postgresql:postgresql")
+
+    testImplementation("com.ritense.valtimoplugins:suwinet-auth:$suwinetAuthVersion")
     testImplementation("com.ritense.valtimo:plugin-valtimo")
     testImplementation("com.ritense.valtimo:value-resolver")
     testImplementation("com.ritense.valtimo:case")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
 
-    // Testing
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    testImplementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
-    testImplementation("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-migrationsupport:$junitJupiterVersion")
-    testImplementation("org.assertj:assertj-core")
-    testImplementation("org.mockito:mockito-core")
-    testImplementation("org.mockito:mockito-junit-jupiter")
-    testImplementation("org.hamcrest:hamcrest-library")
-    testImplementation("com.jayway.jsonpath:json-path:$jsonPathVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
-
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
-    testImplementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-
+    testImplementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 }

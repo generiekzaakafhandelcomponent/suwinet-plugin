@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {SVBPersoonsInfoComponent} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'svb-persoons-info',
     templateUrl: './svb-persoons-info.component.html',
     styleUrls: ['./svb-persoons-info.component.scss'],

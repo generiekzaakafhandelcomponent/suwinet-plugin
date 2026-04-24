@@ -1,6 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
@@ -22,7 +21,6 @@ import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
-
     @Mock
     lateinit var duoInfoService: DUOInfo
 
@@ -41,7 +39,8 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         testHelper = TestHelper
         suwinetSOAPClient = mock()
         val dynamicResponseFactory = DynamicResponseFactory(jacksonObjectMapper())
-        suwinetDuoStudiefinancieringInfoService = SuwinetDuoStudiefinancieringInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        suwinetDuoStudiefinancieringInfoService =
+            SuwinetDuoStudiefinancieringInfoService(suwinetSOAPClient, dynamicResponseFactory)
         suwinetDuoStudiefinancieringInfoService.setConfig(suwinetSOAPClientConfig, "")
     }
 
@@ -53,14 +52,15 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml"
-            )
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_999991954.xml",
+            ),
         )
-        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-            bsn,
-            duoInfoService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+                bsn,
+                duoInfoService,
+                dynamicProperties = listOf("*"),
+            )!!
         // then
         val r = result.dynamicProperties as Map<*, *>
         assertEquals("found bsn should be equal to input parameter", bsn, r["burgerservicenr"])
@@ -76,16 +76,17 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         // when
         whenever(duoInfoService.duoStudiefinancieringInfo(any(DUOStudiefinancieringInfo::class.java))).thenReturn(
             testHelper.unmarshal<DUOStudiefinancieringInfoResponse>(
-                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml"
+                "DUODossierStudiefinancieringGSD_DUOStudiefinancieringInfo_Nietsgevonden.xml",
+            ),
+        )
+        val result =
+            suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
+                bsn,
+                duoInfoService,
+                dynamicProperties = listOf("*"),
             )
-        )
-        val result = suwinetDuoStudiefinancieringInfoService.getStudiefinancieringInfoByBsn(
-            bsn,
-            duoInfoService,
-            dynamicProperties = listOf("*")
-        )
 
         // then
-        assertEquals("result should have no properties when not found", true, result.properties.isEmpty())
+        assertEquals("result should be null when not found", null, result)
     }
 }

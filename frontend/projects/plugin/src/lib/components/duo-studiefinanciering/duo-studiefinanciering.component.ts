@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {DUOStudiefinancieringInfoComponent} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'get-duo-studiefinanciering-info',
     templateUrl: './duo-studiefinanciering.component.html',
     styleUrls: ['./duo-studiefinanciering.component.scss'],

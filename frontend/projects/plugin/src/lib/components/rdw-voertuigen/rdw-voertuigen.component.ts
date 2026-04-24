@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {RdwVoertuigenConfig} from '../../models/'
 
 @Component({
+  standalone: false,
     selector: 'rdw-voertuigen-configuration',
     templateUrl: './rdw-voertuigen.component.html',
     styleUrls: ['./rdw-voertuigen.component.scss'],

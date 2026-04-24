@@ -1,43 +1,37 @@
 package com.ritense.valtimoplugins.suwinet.service
 
-
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.ClientSuwiPersoonsInfo
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.FWI
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.KadasterInfo
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.KadastraalObject
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.KadastraleAanduiding
-import com.ritense.valtimo.implementation.dkd.KadasterInfo.Locatie
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.ObjectFactory
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.ObjectInfoKadastraleAanduidingResponse
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.PersoonsInfoResponse
-import com.ritense.valtimo.implementation.dkd.KadasterInfo.PubliekrechtelijkeBeperking
-import com.ritense.valtimo.implementation.dkd.KadasterInfo.ZakelijkRecht
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
 import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
 import com.ritense.valtimoplugins.suwinet.error.SuwinetError
 import com.ritense.valtimoplugins.suwinet.exception.SuwinetResultNotFoundException
-import com.ritense.valtimoplugins.suwinet.model.AdresDto
 import com.ritense.valtimoplugins.suwinet.model.DynamicResponseDto
 import com.ritense.valtimoplugins.suwinet.model.KadastraleAanduidingDto
-import com.ritense.valtimoplugins.suwinet.model.KadastraleObjectDto
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.xml.ws.WebServiceException
 import jakarta.xml.ws.soap.SOAPFaultException
 import org.springframework.util.StringUtils
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 class SuwinetKadasterInfoService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
-
     lateinit var kadasterService: KadasterInfo
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -63,9 +57,11 @@ class SuwinetKadasterInfoService(
     fun getKadastraleAanduidingenByBsn(
         bsn: String,
         kadasterService: KadasterInfo,
-        dynamicProperties: List<String> = listOf()
+        dynamicProperties: List<String> = listOf(),
     ): DynamicResponseDto? {
-        logger.info { "Getting kadastrale aanduidingen from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting kadastrale aanduidingen from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
             this.kadasterService = kadasterService
@@ -77,9 +73,8 @@ class SuwinetKadasterInfoService(
 
             return DynamicResponseDto(
                 properties = getAvailableProperties(aanduidingen as Any),
-                dynamicProperties = getDynamicProperties(aanduidingen, dynamicProperties)
+                dynamicProperties = getDynamicProperties(aanduidingen, dynamicProperties),
             )
-
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting kadastrale aanduidingen" }
             throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
@@ -95,9 +90,11 @@ class SuwinetKadasterInfoService(
     fun getKadastraleObjectByAanduiding(
         kadastraleAanduiding: KadastraleAanduidingDto,
         kadasterService: KadasterInfo,
-        dynamicProperties: List<String> = listOf()
+        dynamicProperties: List<String> = listOf(),
     ): DynamicResponseDto? {
-        logger.info { "Getting kadastrale objecten from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting kadastrale objecten from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
             this.kadasterService = kadasterService
@@ -109,10 +106,9 @@ class SuwinetKadasterInfoService(
             } else {
                 DynamicResponseDto(
                     properties = getAvailableProperties(result as Any),
-                    dynamicProperties = getDynamicProperties(result, dynamicProperties)
+                    dynamicProperties = getDynamicProperties(result, dynamicProperties),
                 )
             }
-
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting kadastrale objecten" }
             throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
@@ -126,47 +122,50 @@ class SuwinetKadasterInfoService(
     }
 
     private fun getKadastraleObject(kadastraleAanduiding: KadastraleAanduidingDto): KadastraalObject? {
-        val infoKadastraleAanduidingRequest = objectFactory
-            .createObjectInfoKadastraleAanduiding()
-            .apply {
-                cdKadastraleGemeente = kadastraleAanduiding.cdKadastraleGemeente
-                kadastraleGemeentenaam = kadastraleAanduiding.kadastraleGemeentenaam
-                kadastraleSectie = kadastraleAanduiding.kadastraleSectie
-                kadastraalPerceelnr = kadastraleAanduiding.kadastraalPerceelnr
-                volgnrKadastraalAppartementsrecht = kadastraleAanduiding.volgnrKadastraalAppartementsrecht
-            }
-        val infoKadastraleAanduidingResponse = kadasterService.objectInfoKadastraleAanduiding(
-            infoKadastraleAanduidingRequest
-        )
-         return infoKadastraleAanduidingResponse.unwrapResponse()
+        val infoKadastraleAanduidingRequest =
+            objectFactory
+                .createObjectInfoKadastraleAanduiding()
+                .apply {
+                    cdKadastraleGemeente = kadastraleAanduiding.cdKadastraleGemeente
+                    kadastraleGemeentenaam = kadastraleAanduiding.kadastraleGemeentenaam
+                    kadastraleSectie = kadastraleAanduiding.kadastraleSectie
+                    kadastraalPerceelnr = kadastraleAanduiding.kadastraalPerceelnr
+                    volgnrKadastraalAppartementsrecht = kadastraleAanduiding.volgnrKadastraalAppartementsrecht
+                }
+        val infoKadastraleAanduidingResponse =
+            kadasterService.objectInfoKadastraleAanduiding(
+                infoKadastraleAanduidingRequest,
+            )
+        return infoKadastraleAanduidingResponse.unwrapResponse()
     }
 
     private fun retrieveKadasterAanduidingen(bsn: String): List<KadastraleAanduiding> {
-        val persoonsInfoRequest = objectFactory
-            .createPersoonsInfo()
-            .apply {
-                burgerservicenr = bsn
-            }
+        val persoonsInfoRequest =
+            objectFactory
+                .createPersoonsInfo()
+                .apply {
+                    burgerservicenr = bsn
+                }
         val kadasterResponse = this.kadasterService.persoonsInfo(persoonsInfoRequest)
         return kadasterResponse.unwrapResponse()
     }
 
-    //TODO make dynamic
+    // TODO make dynamic
     private fun mapToAanduidingDto(aanduiding: KadastraleAanduiding) =
         KadastraleAanduidingDto(
             cdKadastraleGemeente = aanduiding.cdKadastraleGemeente,
             kadastraleGemeentenaam = aanduiding.kadastraleGemeentenaam,
             kadastraleSectie = aanduiding.kadastraleSectie,
             kadastraalPerceelnr = aanduiding.kadastraalPerceelnr,
-            volgnrKadastraalAppartementsrecht = aanduiding.volgnrKadastraalAppartementsrecht
+            volgnrKadastraalAppartementsrecht = aanduiding.volgnrKadastraalAppartementsrecht,
         )
 
-
     private fun PersoonsInfoResponse.unwrapResponse(): List<KadastraleAanduiding> {
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("PersoonsInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("PersoonsInfoResponse contains no value")
 
         return when (responseValue) {
             is ClientSuwiPersoonsInfo -> {
@@ -187,10 +186,11 @@ class SuwinetKadasterInfoService(
     }
 
     private fun ObjectInfoKadastraleAanduidingResponse.unwrapResponse(): KadastraalObject? {
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("ObjectInfoKadastraleAanduidingResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("ObjectInfoKadastraleAanduidingResponse contains no value")
 
         return when (responseValue) {
             is KadastraalObject -> responseValue
@@ -213,7 +213,7 @@ class SuwinetKadasterInfoService(
 
     private fun getDynamicProperties(
         info: Any,
-        dynamicProperties: List<String>
+        dynamicProperties: List<String>,
     ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
@@ -235,7 +235,6 @@ class SuwinetKadasterInfoService(
 
         return dynamicResponseFactory.flatMapToNested(propertiesMap)
     }
-
 
     companion object {
         private const val SERVICE_PATH = "KadasterDossierGSD-v0300"

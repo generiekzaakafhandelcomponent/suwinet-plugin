@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {DUOPersoonsInfoComponent} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'duo-persoons-info',
     templateUrl: './duo-persoons-info.component.html',
     styleUrls: ['./duo-persoons-info.component.scss'],

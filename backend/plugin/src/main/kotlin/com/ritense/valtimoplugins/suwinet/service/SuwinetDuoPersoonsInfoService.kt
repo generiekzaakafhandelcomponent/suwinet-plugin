@@ -18,14 +18,16 @@ import org.springframework.util.StringUtils
 
 class SuwinetDuoPersoonsInfoService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
-
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -50,16 +52,19 @@ class SuwinetDuoPersoonsInfoService(
     fun getPersoonsInfoByBsn(
         bsn: String,
         duoInfo: DUOInfo,
-        dynamicProperties: List<String> = listOf()
+        dynamicProperties: List<String> = listOf(),
     ): DynamicResponseDto? {
-        logger.info { "Getting duo persoons Onderwijsovereenkomst from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting duo persoons Onderwijsovereenkomst from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
-            val persoonsInfoRequest = objectFactory
-                .createDUOPersoonsInfo()
-                .apply {
-                    burgerservicenr = bsn
-                }
+            val persoonsInfoRequest =
+                objectFactory
+                    .createDUOPersoonsInfo()
+                    .apply {
+                        burgerservicenr = bsn
+                    }
             val response = duoInfo.duoPersoonsInfo(persoonsInfoRequest)
             return response.unwrapResponse(dynamicProperties)
 
@@ -68,42 +73,42 @@ class SuwinetDuoPersoonsInfoService(
             logger.error(e) { "SOAPFaultException - Error getting DUO personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
             // WebServiceExceptions occur when the service is down
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting DUO personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting DUO personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         }
     }
 
     private fun DUOPersoonsInfoResponse.unwrapResponse(dynamicProperties: List<String>): DynamicResponseDto? {
-
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("DUOPersoonsInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("DUOPersoonsInfoResponse contains no value")
 
         return when (responseValue) {
             is DUOPersoonsInfoResponse.ClientSuwi -> {
                 DynamicResponseDto(
                     properties = getAvailableProperties(responseValue),
-                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties)
+                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties),
                 )
             }
 
             is FWI -> {
                 throw SuwinetResultFWIException(
-                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" }
+                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" },
                 )
             }
 
@@ -118,10 +123,12 @@ class SuwinetDuoPersoonsInfoService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> =
-        dynamicResponseFactory.toFlatMap(info).keys.toList()
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
         dynamicProperties.forEach { prop ->

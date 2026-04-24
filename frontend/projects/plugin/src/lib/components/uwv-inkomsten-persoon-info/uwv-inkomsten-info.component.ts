@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {UwvInkomstenPersoonInfoConfig} from '../../models';
 
 @Component({
+  standalone: false,
     selector: 'uwv-inkomsten-persoon-info',
     templateUrl: './uwv-inkomsten-info.component.html',
     styleUrls: ['./uwv-inkomsten-info.component.scss'],

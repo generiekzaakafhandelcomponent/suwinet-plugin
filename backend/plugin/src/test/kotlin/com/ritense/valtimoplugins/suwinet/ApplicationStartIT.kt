@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2024 Ritense BV, the Netherlands.
+ * Copyright 2026 Ritense BV, the Netherlands.
  *
  * Licensed under EUPL, Version 1.2 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.ritense.valtimoplugins.suwinet.model
+package com.ritense.valtimoplugins.suwinet
 
-import java.io.Serializable
+import org.junit.jupiter.api.Test
 
-data class DynamicResponseDto(
-    val properties: List<String> = listOf(),
-    val dynamicProperties: Any,
-) : Serializable
+internal class ApplicationStartIT : BaseIntegrationTest() {
+    @Test
+    fun `should start application`() {
+    }
+}

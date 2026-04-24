@@ -25,6 +25,5 @@
             "type": "button",
             "custom": "form.submit(); component.disabled = true;"
         }
-
     ]
 }

@@ -20,7 +20,6 @@ import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import kotlin.test.junit5.JUnit5Asserter.assertEquals
 
-
 @MockitoSettings(strictness = Strictness.LENIENT)
 internal class SuwinetBrpInfoServiceTest2 : BaseTest() {
     private val logger = KotlinLogging.logger {}
@@ -56,26 +55,31 @@ internal class SuwinetBrpInfoServiceTest2 : BaseTest() {
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture())
+            brpService.aanvraagPersoon(paramBrpInfo.capture()),
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
             )
         }
 
-        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
-            bsn,
-            brpService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetBrpInfoService.getPersoonsgegevensByBsn(
+                bsn,
+                brpService,
+                dynamicProperties = listOf("*"),
+            )
 
         // then
         val r = result?.dynamicProperties as Map<*, *>
         assertEquals("found brp bsn should be as input", bsn, r["burgerservicenr"])
         val nationaliteit = r["nationaliteit"] as List<*>
         assertEquals("found brp person nationaliteiten size should be 5", 5, nationaliteit.size)
-        assertEquals("first nationaliteit cdNationaliteit should be 0001", cdNationaliteit1, (nationaliteit[0] as Map<*, *>)["cdNationaliteit"])
+        assertEquals(
+            "first nationaliteit cdNationaliteit should be 0001",
+            cdNationaliteit1,
+            (nationaliteit[0] as Map<*, *>)["cdNationaliteit"],
+        )
     }
 
     @Test
@@ -87,19 +91,20 @@ internal class SuwinetBrpInfoServiceTest2 : BaseTest() {
         // when
         val paramBrpInfo = ArgumentCaptor.forClass(Request::class.java)
         whenever(
-            brpService.aanvraagPersoon(paramBrpInfo.capture())
+            brpService.aanvraagPersoon(paramBrpInfo.capture()),
         ).thenAnswer {
             val brpRequest = it.arguments[0] as Request
             testHelper.unmarshal<AanvraagPersoonResponse>(
-                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml"
+                "BRPDossierPersoonGSD_AanvraagPersoon_${brpRequest.burgerservicenr}.xml",
             )
         }
 
-        val result = suwinetBrpInfoService.getPersoonsgegevensByBsn(
-            bsn,
-            brpService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetBrpInfoService.getPersoonsgegevensByBsn(
+                bsn,
+                brpService,
+                dynamicProperties = listOf("*"),
+            )
 
         // then
         val r = result?.dynamicProperties as Map<*, *>

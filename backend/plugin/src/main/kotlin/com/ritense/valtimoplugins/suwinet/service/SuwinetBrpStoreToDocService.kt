@@ -5,20 +5,20 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.document.service.DocumentService
 import com.ritense.valtimoplugins.suwinet.exception.ParseToDtoException
 import com.ritense.valtimoplugins.suwinet.model.brp.PersoonDto
-import java.time.temporal.ChronoField
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.time.temporal.ChronoField
 
 @Suppress("UNUSED")
 class SuwinetBrpStoreToDocService(
     private val suwinetDocumentWriterService: SuwinetDocumentWriterService,
     private val documentService: DocumentService,
     private val dateTimeService: DateTimeService,
-    private val maxAgeKindAlsThuiswonend: Int
+    private val maxAgeKindAlsThuiswonend: Int,
 ) {
     fun storePersoonsgegevens(
         brpPersoonsgegevensInfo: Map<String, Any>?,
         targetPathPersoon: String,
-        businessKey: String
+        businessKey: String,
     ) {
         /**
          *  store BRP Persoon and partner document
@@ -40,7 +40,7 @@ class SuwinetBrpStoreToDocService(
         brpPersoonsgegevensKinderenInfo: List<Map<String, Any>>?,
         brpPersoonsgegevensInfo: Map<String, Any>?,
         targetPath: String,
-        businessKey: String
+        businessKey: String,
     ) {
         /**
          *  filter and store BRP Kinderen in document
@@ -55,27 +55,35 @@ class SuwinetBrpStoreToDocService(
                         ?.let { persoonInfo ->
                             val yearOfCaseCreation = getCaseCreationDate(businessKey)
                             val persoon: PersoonDto = objectMapper.convertValue(persoonInfo)
-                            val filteredKinderen = kinderen.map { kindInfo ->
-                                objectMapper.convertValue<PersoonDto>(kindInfo)
-                            }.filter { kind ->
-                                kind.adresBrp == persoon.adresBrp
-                                        && kind.datumOverlijden.isNullOrEmpty()
-                                        && isNotToOld(kind.geboortedatum, yearOfCaseCreation)
-                            }
-                            suwinetDocumentWriterService.writeValueToDocumentAtPath(filteredKinderen, targetPath, businessKey)
+                            val filteredKinderen =
+                                kinderen
+                                    .map { kindInfo ->
+                                        objectMapper.convertValue<PersoonDto>(kindInfo)
+                                    }.filter { kind ->
+                                        kind.adresBrp == persoon.adresBrp &&
+                                            kind.datumOverlijden.isNullOrEmpty() &&
+                                            isNotToOld(kind.geboortedatum, yearOfCaseCreation)
+                                    }
+                            suwinetDocumentWriterService.writeValueToDocumentAtPath(
+                                filteredKinderen,
+                                targetPath,
+                                businessKey,
+                            )
                         } ?: throw ParseToDtoException("Unable to convert brp parent map to Dto")
                 } ?: throw IllegalArgumentException("children map null")
         } catch (e: Exception) {
             logger.error("Exiting scope due to nested error.", e)
             return
         }
-
     }
 
-    private fun isNotToOld(geboortedatum: String, yearOfCaseCreation: Int) =
-        yearOfCaseCreation - dateTimeService.getYearFromDateString(
+    private fun isNotToOld(
+        geboortedatum: String,
+        yearOfCaseCreation: Int,
+    ) = yearOfCaseCreation -
+        dateTimeService.getYearFromDateString(
             geboortedatum,
-            SUWINET_DATEIN_PATTERN
+            SUWINET_DATEIN_PATTERN,
         ) < maxAgeKindAlsThuiswonend
 
     private fun getCaseCreationDate(businessKey: String): Int {

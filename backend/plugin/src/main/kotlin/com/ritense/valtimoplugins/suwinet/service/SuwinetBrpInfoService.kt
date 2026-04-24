@@ -19,13 +19,16 @@ import org.springframework.util.StringUtils
 
 class SuwinetBrpInfoService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -49,15 +52,19 @@ class SuwinetBrpInfoService(
     }
 
     fun getPersoonsgegevensByBsn(
-        bsn: String, brpService: BRPInfo, dynamicProperties: List<String>
+        bsn: String,
+        brpService: BRPInfo,
+        dynamicProperties: List<String>,
     ): DynamicResponseDto? {
-
-        logger.info { "Getting BRP personal info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting BRP personal info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
-            val request = objectFactory.createRequest().apply {
-                burgerservicenr = bsn
-            }
+            val request =
+                objectFactory.createRequest().apply {
+                    burgerservicenr = bsn
+                }
             val person = brpService.aanvraagPersoon(request)
 
             return person.unwrapResponse(dynamicProperties)
@@ -67,26 +74,25 @@ class SuwinetBrpInfoService(
             logger.error(e) { "SOAPFaultException - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
             // WebServiceExceptions occur when the service is down
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting BRP personal info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         }
     }
 
     private fun AanvraagPersoonResponse.unwrapResponse(dynamicProperties: List<String>): DynamicResponseDto? {
-
         val responseValue =
             content.firstOrNull() ?: throw IllegalStateException("AanvraagPersoonResponse contains no value")
 
@@ -95,13 +101,17 @@ class SuwinetBrpInfoService(
                 val persoon = responseValue.value as ClientSuwi
                 DynamicResponseDto(
                     properties = getAvailableProperties(persoon),
-                    dynamicProperties = getDynamicProperties(persoon, dynamicProperties)
+                    dynamicProperties = getDynamicProperties(persoon, dynamicProperties),
                 )
             }
 
             is FWI -> {
                 val fwiResponse = responseValue.value as FWI
-                throw SuwinetResultFWIException(fwiResponse.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" })
+                throw SuwinetResultFWIException(
+                    fwiResponse.foutOrWaarschuwingOrInformatie.joinToString {
+                        "${it.name} / ${it.value}\n"
+                    },
+                )
             }
 
             else -> {
@@ -115,10 +125,12 @@ class SuwinetBrpInfoService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> =
-        dynamicResponseFactory.toFlatMap(info).keys.toList()
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
         dynamicProperties.forEach { prop ->

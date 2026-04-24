@@ -24,6 +24,7 @@ import {SuwinetPluginConfig} from "../../models";
 import {TranslateService} from "@ngx-translate/core";
 
 @Component({
+  standalone: false,
   selector: 'suwinet-plugin-configuration',
   templateUrl: './suwinet-plugin-configuration.component.html',
   styleUrls: ['./suwinet-plugin-configuration.component.scss'],
