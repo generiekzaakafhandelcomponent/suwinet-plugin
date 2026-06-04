@@ -20,6 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {KadasterobjectenConfig, KadastraleAanduidingenConfig} from '../../models';
 
 @Component({
+    standalone: false,
     selector: 'kadaster-aanduidingen-info',
     templateUrl: './kadastrale-aanduidingen.component.html',
     styleUrls: ['./kadastrale-aanduidingen.component.scss'],
@@ -51,7 +52,7 @@ export class KadastraleAanduidingenComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: KadasterobjectenConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

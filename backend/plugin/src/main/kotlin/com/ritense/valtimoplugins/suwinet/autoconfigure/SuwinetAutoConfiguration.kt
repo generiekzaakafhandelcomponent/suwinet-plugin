@@ -3,15 +3,15 @@ package com.ritense.valtimoplugins.suwinet.autoconfigure
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ritense.document.service.DocumentService
 import com.ritense.plugin.service.PluginService
+import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
 import com.ritense.valtimo.contract.annotation.ProcessBean
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
-import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
 import com.ritense.valtimoplugins.suwinet.plugin.SuwiNetPluginFactory
 import com.ritense.valtimoplugins.suwinet.service.DateTimeService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetDocumentWriterService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetBijstandsregelingenService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetBrpInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetBrpStoreToDocService
-import com.ritense.valtimoplugins.suwinet.service.SuwinetDocumentWriterService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetDuoPersoonsInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetDuoStudiefinancieringInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetKadasterInfoService
@@ -24,92 +24,117 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class SuwinetAutoConfiguration {
-    @Bean
-    @ProcessBean
-    fun suwinetDocumentWriterService(documentService: DocumentService): SuwinetDocumentWriterService =
-        SuwinetDocumentWriterService(documentService)
-
-    @Bean
-    fun suwinetSOAPClient(): SuwinetSOAPClient = SuwinetSOAPClient()
-
-    @Bean
-    fun dynamicResponseFactory(objectMapper: ObjectMapper): DynamicResponseFactory =
-        DynamicResponseFactory(objectMapper)
 
     @Bean
     @ProcessBean
-    fun dateTimeService(): DateTimeService = DateTimeService()
+    fun suwinetDocumentWriterService(
+        documentService: DocumentService
+    ): SuwinetDocumentWriterService {
+        return SuwinetDocumentWriterService(documentService)
+    }
+
+    @Bean
+    fun suwinetSOAPClient(): SuwinetSOAPClient {
+        return SuwinetSOAPClient()
+    }
+
+    @Bean
+    fun dynamicResponseFactory(objectMapper: ObjectMapper): DynamicResponseFactory {
+        return DynamicResponseFactory(objectMapper)
+    }
+
+    @Bean
+    @ProcessBean
+    fun dateTimeService(): DateTimeService {
+        return DateTimeService()
+    }
 
     @Bean
     @ProcessBean
     fun suwinetBrpInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetBrpInfoService = SuwinetBrpInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetBrpInfoService {
+        return SuwinetBrpInfoService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetRdwService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetRdwService = SuwinetRdwService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetRdwService {
+        return SuwinetRdwService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetDUOPersoonsInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetDuoPersoonsInfoService = SuwinetDuoPersoonsInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetDuoPersoonsInfoService {
+        return SuwinetDuoPersoonsInfoService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetDuoStudiefinancieringInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetDuoStudiefinancieringInfoService =
-        SuwinetDuoStudiefinancieringInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetDuoStudiefinancieringInfoService {
+        return SuwinetDuoStudiefinancieringInfoService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetSvbPersoonsInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetSvbPersoonsInfoService = SuwinetSvbPersoonsInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetSvbPersoonsInfoService {
+        return SuwinetSvbPersoonsInfoService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetUwvPersoonsIkvService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetUwvPersoonsIkvService = SuwinetUwvPersoonsIkvService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetUwvPersoonsIkvService {
+        return SuwinetUwvPersoonsIkvService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetKadasterInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetKadasterInfoService = SuwinetKadasterInfoService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetKadasterInfoService {
+        return SuwinetKadasterInfoService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     @ProcessBean
     fun suwinetBrpStoreToDocService(
         suwinetDocumentWriterService: SuwinetDocumentWriterService,
         documentService: DocumentService,
-        @Value("\${implementation.suwinet.maxAgeKindAlsThuiswonend:99}") maxAgeKindAlsThuiswonend: Int,
-    ): SuwinetBrpStoreToDocService =
-        SuwinetBrpStoreToDocService(
+        @Value("\${implementation.suwinet.maxAgeKindAlsThuiswonend:99}") maxAgeKindAlsThuiswonend: Int
+    ): SuwinetBrpStoreToDocService {
+        return SuwinetBrpStoreToDocService(
             suwinetDocumentWriterService,
             documentService,
             DateTimeService(),
-            maxAgeKindAlsThuiswonend,
+            maxAgeKindAlsThuiswonend
         )
+    }
 
     @Bean
     @ProcessBean
     fun suwinetBijstandsRegelingenInfoService(
         suwinetSOAPClient: SuwinetSOAPClient,
-        dynamicResponseFactory: DynamicResponseFactory,
-    ): SuwinetBijstandsregelingenService = SuwinetBijstandsregelingenService(suwinetSOAPClient, dynamicResponseFactory)
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetBijstandsregelingenService {
+        return SuwinetBijstandsregelingenService(suwinetSOAPClient, dynamicResponseFactory)
+    }
 
     @Bean
     fun suwiNetPluginFactory(
@@ -121,17 +146,16 @@ class SuwinetAutoConfiguration {
         suwinetSvbPersoonsInfoService: SuwinetSvbPersoonsInfoService,
         suwinetUwvPersoonsIkvService: SuwinetUwvPersoonsIkvService,
         suwinetKadasterInfoService: SuwinetKadasterInfoService,
-        suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService,
-    ): SuwiNetPluginFactory =
-        SuwiNetPluginFactory(
-            pluginService,
-            suwinetBrpInfoService,
-            suwinetDuoPersoonsInfoService,
-            suwinetDuoStudiefinancieringInfoService,
-            suwinetKadasterInfoService,
-            suwinetRdwService,
-            suwinetSvbPersoonsInfoService,
-            suwinetUwvPersoonsIkvService,
-            suwinetBijstandsregelingenService,
-        )
+        suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService
+    ): SuwiNetPluginFactory = SuwiNetPluginFactory(
+        pluginService,
+        suwinetBrpInfoService,
+        suwinetDuoPersoonsInfoService,
+        suwinetDuoStudiefinancieringInfoService,
+        suwinetKadasterInfoService,
+        suwinetRdwService,
+        suwinetSvbPersoonsInfoService,
+        suwinetUwvPersoonsIkvService,
+        suwinetBijstandsregelingenService
+    )
 }

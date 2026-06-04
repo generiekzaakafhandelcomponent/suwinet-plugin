@@ -12,6 +12,9 @@ dependencies {
     implementation("org.postgresql:postgresql")
     implementation("io.github.oshai:kotlin-logging:$kotlinLoggingVersion")
 
+    //plugins
+    implementation("com.ritense.valtimoplugins:suwinet-auth:1.0.1")
+
     if (System.getProperty("os.arch") == "aarch64") {
         runtimeOnly("io.netty:netty-resolver-dns-native-macos:$nettyResolverDnsNativeMacOsVersion:osx-aarch_64")
     }

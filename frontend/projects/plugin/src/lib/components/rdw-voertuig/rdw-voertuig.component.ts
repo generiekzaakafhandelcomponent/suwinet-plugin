@@ -23,6 +23,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {RdwVoertuigConfig} from '../../models/';
 
 @Component({
+    standalone: false,
     selector: 'rdw-voertuig-configuration',
     templateUrl: './rdw-voertuig.component.html',
     styleUrls: ['./rdw-voertuig.component.scss'],
@@ -57,7 +58,7 @@ export class RdwVoertuigComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: RdwVoertuigConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

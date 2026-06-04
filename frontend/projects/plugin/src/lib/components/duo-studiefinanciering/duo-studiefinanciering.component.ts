@@ -20,7 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {DUOStudiefinancieringInfoComponent} from '../../models';
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'get-duo-studiefinanciering-info',
     templateUrl: './duo-studiefinanciering.component.html',
     styleUrls: ['./duo-studiefinanciering.component.scss'],
@@ -52,7 +52,7 @@ export class DuoStudiefinancieringComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: DUOStudiefinancieringInfoComponent): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }
