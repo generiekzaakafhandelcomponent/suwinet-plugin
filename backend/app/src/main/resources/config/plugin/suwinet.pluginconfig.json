@@ -6,8 +6,8 @@
     "properties": {
       "baseUrl": "http://localhost:8090/ws/",
       "authenticationPluginConfiguration": "86f519bf-8057-44a8-a20e-cbf4494c9e9d",
-      "connectionTimeout": 10000,
-      "receiveTimeout": 10000
+      "connectionTimeout": 10,
+      "receiveTimeout": 10
     }
   }
 ]
