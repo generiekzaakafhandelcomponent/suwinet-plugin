@@ -92,6 +92,7 @@ import {ResourceModule} from "@valtimo/resource";
 import {SecurityModule} from "@valtimo/security";
 import {SseModule} from "@valtimo/sse";
 import {SwaggerModule} from "@valtimo/swagger";
+import {SuwinetAuthPluginModule, suwinetAuthPluginSpecification} from "@valtimo-plugins/suwinet-auth";
 import {TaskModule} from "@valtimo/task";
 import {TeamsModule} from "@valtimo/teams";
 import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
@@ -159,6 +160,7 @@ export function tabsFactory() {
     ReactiveFormsModule,
     ResourceModule,
     SuwinetPluginModule,
+    SuwinetAuthPluginModule,
     SecurityModule,
     SseModule,
     SwaggerModule,
@@ -191,6 +193,7 @@ export function tabsFactory() {
         openNotificatiesPluginSpecification,
         openZaakPluginSpecification,
         suwinetPluginSpecification,
+        suwinetAuthPluginSpecification,
         zakenApiPluginSpecification,
       ],
     },
