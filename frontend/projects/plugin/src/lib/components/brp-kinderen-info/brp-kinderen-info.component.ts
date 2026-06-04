@@ -21,7 +21,7 @@ import {BrpKinderenInfoConfig} from '../../models';
 
 @Component({
     standalone: false,
-    selector: 'brp-partner-info',
+    selector: 'brp-kinderen-info',
     templateUrl: './brp-kinderen-info.component.html',
     styleUrls: ['./brp-kinderen-info.component.scss'],
 })
