@@ -18,11 +18,15 @@
  */
 
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {FunctionConfigurationComponent} from '@valtimo/plugin';
+import {CommonModule} from '@angular/common';
+import {FunctionConfigurationComponent, PluginTranslatePipeModule} from '@valtimo/plugin';
+import {CarbonMultiInputModule, FormModule, InputModule, ParagraphModule} from '@valtimo/components';
 import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} from 'rxjs';
 import {RdwKentekensConfig} from '../../models/';
 
 @Component({
+    standalone: true,
+    imports: [CommonModule, PluginTranslatePipeModule, FormModule, InputModule, CarbonMultiInputModule, ParagraphModule],
     selector: 'rdw-kenteken-configuration',
     templateUrl: './rdw-kenteken.component.html',
     styleUrls: ['./rdw-kenteken.component.scss'],
@@ -57,7 +61,7 @@ export class RdwKentekenComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: RdwKentekensConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

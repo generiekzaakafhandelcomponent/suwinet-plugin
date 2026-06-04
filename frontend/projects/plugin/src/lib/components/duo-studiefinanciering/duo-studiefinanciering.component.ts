@@ -52,7 +52,7 @@ export class DuoStudiefinancieringComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: DUOStudiefinancieringInfoComponent): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

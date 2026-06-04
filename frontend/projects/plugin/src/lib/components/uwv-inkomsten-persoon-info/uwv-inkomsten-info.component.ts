@@ -52,7 +52,7 @@ export class UwvInkomstenInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: UwvInkomstenPersoonInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

@@ -53,7 +53,7 @@ export class RdwVoertuigenComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: RdwVoertuigenConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

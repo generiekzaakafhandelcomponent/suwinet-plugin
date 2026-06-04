@@ -65,7 +65,7 @@
             [title]="'connectionTimeout' | pluginTranslate: pluginId | async"
             [margin]="true"
             [fullWidth]="true"
-            [defaultValue]="obs.prefill?.connectionTimeout"
+            [defaultValue]="obs.prefill?.connectionTimeout?.toString()"
             [disabled]="obs.disabled"
             [required]="false"
     >
@@ -76,7 +76,7 @@
             [title]="'receiveTimeout' | pluginTranslate: pluginId | async"
             [margin]="true"
             [fullWidth]="true"
-            [defaultValue]="obs.prefill?.receiveTimeout"
+            [defaultValue]="obs.prefill?.receiveTimeout?.toString()"
             [disabled]="obs.disabled"
             [required]="false"
     >

@@ -54,7 +54,7 @@ export class BrpKinderenInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: BrpKinderenInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

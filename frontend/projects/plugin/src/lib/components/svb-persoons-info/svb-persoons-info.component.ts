@@ -52,7 +52,7 @@ export class SvbPersoonsInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: SVBPersoonsInfoComponent): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

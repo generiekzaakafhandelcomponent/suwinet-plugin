@@ -52,7 +52,7 @@ export class KadastraleObjectenComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: KadasterobjectenConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

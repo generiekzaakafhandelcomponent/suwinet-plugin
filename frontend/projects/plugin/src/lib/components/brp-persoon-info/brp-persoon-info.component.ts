@@ -54,7 +54,7 @@ export class BrpPersoonInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: BrpPersoonInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

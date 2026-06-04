@@ -52,7 +52,7 @@ export class DuoPersoonsInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: DUOPersoonsInfoComponent): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }
