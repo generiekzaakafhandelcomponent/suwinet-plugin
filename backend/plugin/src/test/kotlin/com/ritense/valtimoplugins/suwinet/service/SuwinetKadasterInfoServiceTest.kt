@@ -66,7 +66,7 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         )
 
         // then
-        assertEquals("found kadastrale aanduidingen should be empty", true, result!!.properties.isEmpty())
+        assertEquals("result should be null when not found", null, result)
     }
 
     @Test

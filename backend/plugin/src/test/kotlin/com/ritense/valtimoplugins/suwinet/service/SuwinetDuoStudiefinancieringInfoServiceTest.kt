@@ -86,6 +86,6 @@ internal class SuwinetDuoStudiefinancieringInfoServiceTest : BaseTest() {
         )
 
         // then
-        assertEquals("result should have no properties when not found", true, result!!.properties.isEmpty())
+        assertEquals("result should be null when not found", null, result)
     }
 }

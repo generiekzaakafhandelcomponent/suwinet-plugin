@@ -108,6 +108,6 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
             dynamicProperties = listOf("*")
         )
         // then
-        assertEquals("no uitkeringen not found", true, result!!.properties.isEmpty())
+        assertEquals("result should be null when not found", null, result)
     }
 }
