@@ -1,5 +1,6 @@
 package com.ritense.valtimoplugins.suwinet.service
 
+
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimoplugins.BaseTest
@@ -54,18 +55,17 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_111111110.xml",
-            ),
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_111111110.xml"
+            )
         )
 
-        val result =
-            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                svbInfo,
-                dynamicProperties = listOf("*"),
-            )!!
+        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            svbInfo,
+            dynamicProperties = listOf("*")
+        )
         logger.info { "$result" }
-        val uitkeringsverhouding = (result.dynamicProperties as Map<*, *>)["uitkeringsverhouding"] as List<*>
+        val uitkeringsverhouding = (result!!.dynamicProperties as Map<*, *>)["uitkeringsverhouding"] as List<*>
         assertEquals("found svb bsn should be contain 2 uitkeringen", 2, uitkeringsverhouding.size)
     }
 
@@ -77,17 +77,16 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_444444440.xml",
-            ),
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_444444440.xml"
+            )
         )
-        val result =
-            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                svbInfo,
-                dynamicProperties = listOf("*"),
-            )!!
+        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            svbInfo,
+            dynamicProperties = listOf("*")
+        )
         // then
-        val uitkeringsverhouding = (result.dynamicProperties as Map<*, *>)["uitkeringsverhouding"] as List<*>
+        val uitkeringsverhouding = (result!!.dynamicProperties as Map<*, *>)["uitkeringsverhouding"] as List<*>
         assertEquals("found svb bsn should be contain 1 uitkering", 1, uitkeringsverhouding.size)
     }
 
@@ -99,16 +98,15 @@ internal class SuwinetSvbInfoServiceTest : BaseTest() {
         // when
         whenever(svbInfo.svbPersoonsInfo(any(SVBPersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<SVBPersoonsInfoResponse>(
-                "SVBDossierPersoonGSD_SVBPersoonsInfo_Nietsgevonden.xml",
-            ),
+                "SVBDossierPersoonGSD_SVBPersoonsInfo_Nietsgevonden.xml"
+            )
         )
 
-        val result =
-            suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
-                bsn,
-                svbInfo,
-                dynamicProperties = listOf("*"),
-            )
+        val result = suwinetSVBPersoonsInfoService.getPersoonsgegevensByBsn(
+            bsn,
+            svbInfo,
+            dynamicProperties = listOf("*")
+        )
         // then
         assertEquals("result should be null when not found", null, result)
     }

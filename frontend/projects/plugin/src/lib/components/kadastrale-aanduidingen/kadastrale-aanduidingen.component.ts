@@ -17,9 +17,10 @@
 import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {FunctionConfigurationComponent} from '@valtimo/plugin';
 import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} from 'rxjs';
-import {KadasterobjectenConfig, KadastraleAanduidingenConfig} from '../../models';
+import {KadastraleAanduidingenConfig} from '../../models';
 
 @Component({
+    standalone: false,
     selector: 'kadaster-aanduidingen-info',
     templateUrl: './kadastrale-aanduidingen.component.html',
     styleUrls: ['./kadastrale-aanduidingen.component.scss'],
@@ -32,10 +33,10 @@ export class KadastraleAanduidingenComponent
     @Input() pluginId: string;
     @Input() prefillConfiguration$: Observable<KadastraleAanduidingenConfig>;
     @Output() valid: EventEmitter<boolean> = new EventEmitter<boolean>();
-    @Output() configuration: EventEmitter<KadasterobjectenConfig> = new EventEmitter<KadasterobjectenConfig>();
+    @Output() configuration: EventEmitter<KadastraleAanduidingenConfig> = new EventEmitter<KadastraleAanduidingenConfig>();
 
     private saveSubscription!: Subscription;
-    private readonly formValue$ = new BehaviorSubject<KadasterobjectenConfig | null>(null);
+    private readonly formValue$ = new BehaviorSubject<KadastraleAanduidingenConfig | null>(null);
     private readonly valid$ = new BehaviorSubject<boolean>(false);
 
     defaultValues$;
@@ -51,14 +52,14 @@ export class KadastraleAanduidingenComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: KadasterobjectenConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }
 
-    private handleValid(formValue: KadasterobjectenConfig): void {
+    private handleValid(formValue: KadastraleAanduidingenConfig): void {
         const valid = !!(
-            formValue.kadastraleAanduidingVariabeleName &&
+            formValue.bsn &&
             formValue.resultProcessVariableName &&
             formValue.dynamicProperties
         );

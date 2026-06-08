@@ -20,7 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {SVBPersoonsInfoComponent} from '../../models';
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'svb-persoons-info',
     templateUrl: './svb-persoons-info.component.html',
     styleUrls: ['./svb-persoons-info.component.scss'],
@@ -52,7 +52,7 @@ export class SvbPersoonsInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: SVBPersoonsInfoComponent): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

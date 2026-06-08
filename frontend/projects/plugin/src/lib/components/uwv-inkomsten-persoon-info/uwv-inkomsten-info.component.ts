@@ -20,7 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {UwvInkomstenPersoonInfoConfig} from '../../models';
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'uwv-inkomsten-persoon-info',
     templateUrl: './uwv-inkomsten-info.component.html',
     styleUrls: ['./uwv-inkomsten-info.component.scss'],
@@ -52,7 +52,7 @@ export class UwvInkomstenInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: UwvInkomstenPersoonInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

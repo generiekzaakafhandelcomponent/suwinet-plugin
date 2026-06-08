@@ -20,7 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {BrpPersoonInfoConfig} from '../../models';
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'brp-persoon-info',
     templateUrl: './brp-persoon-info.component.html',
     styleUrls: ['./brp-persoon-info.component.scss'],
@@ -54,7 +54,7 @@ export class BrpPersoonInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: BrpPersoonInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "86f519bf-8057-44a8-a20e-cbf4494c9e9d",
+    "title": "Suwinet auth plugin (autodeployed)",
+    "pluginDefinitionKey": "suwinet-auth",
+    "properties": {
+      "keystorePath": "",
+      "keystoreSecret": "",
+      "truststorePath": "",
+      "truststoreSecret": "",
+      "basicAuthName": "user",
+      "basicAuthSecret": "pwd",
+      "authType": "BASIC"
+    }
+  }
+]

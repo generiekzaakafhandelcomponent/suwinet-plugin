@@ -8,6 +8,7 @@ import java.time.LocalDate
  */
 
 data class AanvraagUitkeringDto(
+
     /**
      *  De datum van de dag waarop de AANVRAAG UITKERING door het
      * UITVOERINGSORGAAN is ontvangen.
@@ -16,5 +17,5 @@ data class AanvraagUitkeringDto(
     val szWet: SzWetDto?,
     val beslissingOpAanvraagUitkering: BeslissingOpAanvraagUitkeringDto?,
     val partnerAanvraagUitkering: PartnerBijstandDto?,
-    val bron: BronDto?,
+    val bron: BronDto?
 )

@@ -20,7 +20,7 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take, tap
 import {BijstandsRegelingenInfoConfig} from '../../models';
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'bijstandsregelingen-info',
     templateUrl: './bijstandsregelingen-info.component.html',
     styleUrls: ['./bijstandsregelingen-info.component.scss'],
@@ -53,7 +53,7 @@ export class BijstandsregelingenInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: BijstandsRegelingenInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }

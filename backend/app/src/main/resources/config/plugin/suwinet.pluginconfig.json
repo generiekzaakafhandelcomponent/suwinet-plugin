@@ -1,14 +1,13 @@
 [
-    {
-        "id": "744533ea-28c9-434c-80bb-542967b477eb",
-        "title": "Suwinet lokaal (Autodeployed)",
-        "pluginDefinitionKey": "suwinet",
-        "properties": {
-            "baseUrl": "http://localhost:8090/ws/",
-            "basicAuthName": "user",
-            "basicAuthSecret": "pwd",
-            "connectionTimeout": 10,
-            "receiveTimeout": 10
-        }
+  {
+    "id": "744533ea-28c9-434c-80bb-542967b477eb",
+    "title": "Suwinet lokaal (Autodeployed)",
+    "pluginDefinitionKey": "suwinet",
+    "properties": {
+      "baseUrl": "http://localhost:8090/ws/",
+      "authenticationPluginConfiguration": "86f519bf-8057-44a8-a20e-cbf4494c9e9d",
+      "connectionTimeout": 10,
+      "receiveTimeout": 10
     }
+  }
 ]

@@ -30,7 +30,7 @@ import {TranslateService} from "@ngx-translate/core";
   styleUrls: ['./suwinet-plugin-configuration.component.scss'],
 })
 export class SuwinetPluginConfigurationComponent
-  implements SuwinetPluginConfigurationComponent, OnInit, OnDestroy {
+  implements PluginConfigurationComponent, OnInit, OnDestroy {
     @Input() save$: Observable<void>;
     @Input() disabled$: Observable<boolean>;
     @Input() pluginId: string;
@@ -44,8 +44,13 @@ export class SuwinetPluginConfigurationComponent
     private readonly formValue$ = new BehaviorSubject<SuwinetPluginConfig | null>(null);
     private readonly valid$ = new BehaviorSubject<boolean>(false);
 
-    readonly authenticationPluginSelectItems$: Observable<Array<{ id: string; text: string }>> =
-        combineLatest([
+    readonly authenticationPluginSelectItems$: Observable<Array<{ id: string; text: string }>>;
+
+    constructor(
+        private readonly pluginManagementService: PluginManagementService,
+        private readonly pluginTranslationService: PluginTranslationService,
+        private readonly translateService: TranslateService,) {
+        this.authenticationPluginSelectItems$ = combineLatest([
             this.pluginManagementService.getPluginConfigurationsByCategory(
                 'suwinet-authentication'
             ),
@@ -61,10 +66,6 @@ export class SuwinetPluginConfigurationComponent
                 }))
             )
         );
-    constructor(
-        private readonly pluginManagementService: PluginManagementService,
-        private readonly pluginTranslationService: PluginTranslationService,
-        private readonly translateService: TranslateService,) {
     }
 
   ngOnInit(): void {
@@ -75,7 +76,7 @@ export class SuwinetPluginConfigurationComponent
     this.saveSubscription?.unsubscribe();
   }
 
-  formValueChange(formValue: SuwinetPluginConfig): void {
+  formValueChange(formValue: any): void {
     this.formValue$.next(formValue);
     this.handleValid(formValue);
   }
@@ -83,7 +84,8 @@ export class SuwinetPluginConfigurationComponent
   private handleValid(formValue: SuwinetPluginConfig): void {
     const valid = !!(
         formValue.configurationTitle &&
-        formValue.baseUrl
+        formValue.baseUrl &&
+        formValue.authenticationPluginConfiguration
     );
 
     this.valid$.next(valid);

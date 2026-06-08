@@ -20,8 +20,8 @@ import {BehaviorSubject, combineLatest, map, Observable, Subscription, take} fro
 import {BrpKinderenInfoConfig} from '../../models';
 
 @Component({
-  standalone: false,
-    selector: 'brp-partner-info',
+    standalone: false,
+    selector: 'brp-kinderen-info',
     templateUrl: './brp-kinderen-info.component.html',
     styleUrls: ['./brp-kinderen-info.component.scss'],
 })
@@ -54,7 +54,7 @@ export class BrpKinderenInfoComponent
         this.saveSubscription?.unsubscribe();
     }
 
-    formValueChange(formValue: BrpKinderenInfoConfig): void {
+    formValueChange(formValue: any): void {
         this.formValue$.next(formValue);
         this.handleValid(formValue);
     }
