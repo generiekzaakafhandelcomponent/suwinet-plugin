@@ -1,9 +1,9 @@
 package com.ritense.valtimoplugins.suwinet.client
 
 import org.apache.cxf.binding.soap.SoapMessage
-import org.apache.cxf.phase.Phase
 import org.apache.cxf.message.Message
 import org.apache.cxf.phase.AbstractPhaseInterceptor
+import org.apache.cxf.phase.Phase
 
 class StripSoapActionQuotesInterceptor : AbstractPhaseInterceptor<SoapMessage>(Phase.PRE_PROTOCOL) {
     override fun handleMessage(message: SoapMessage) {

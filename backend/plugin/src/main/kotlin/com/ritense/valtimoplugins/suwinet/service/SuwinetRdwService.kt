@@ -20,7 +20,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-
 const val SUWINET_DATE_PATTERN = "yyyyMMdd"
 const val SUWINET_TIME_PATTERN = "HHmmss00"
 
@@ -32,7 +31,10 @@ class SuwinetRdwService(
     lateinit var soapClientConfig: SuwinetSOAPClientConfig
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -49,7 +51,7 @@ class SuwinetRdwService(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
+                soapClientConfig.authConfig,
             )
     }
 
@@ -58,10 +60,11 @@ class SuwinetRdwService(
         rdwService: RDW,
         dynamicProperties: List<String>,
     ): DynamicResponseDto {
-
         this.rdwService = rdwService
 
-        logger.info { "retrieving RDW Voertuigen info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "retrieving RDW Voertuigen info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         return try {
             val kentekens = retrieveVoertuigenBezitInfo(bsn)
@@ -71,7 +74,7 @@ class SuwinetRdwService(
             val wrapper = VoertuigenWrapper(aansprakelijken)
             DynamicResponseDto(
                 properties = getAvailableProperties(wrapper),
-                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties)
+                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties),
             )
 
             // SOAPFaultException occur when something is wrong with the request/response
@@ -79,20 +82,20 @@ class SuwinetRdwService(
             logger.error(e) { "SOAPFaultException - Error getting RDW voertuigen info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
             // WebServiceExceptions occur when the service is down
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting RDW voertuigen info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting RDW voertuigen info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         }
     }
@@ -107,9 +110,7 @@ class SuwinetRdwService(
         return response.unwrapResponse()
     }
 
-    private fun retrieveAansprakelijkeInfoFromSuwi(
-        kenteken: String
-    ): KentekenInfoResponse.ClientSuwi.Aansprakelijke? {
+    private fun retrieveAansprakelijkeInfoFromSuwi(kenteken: String): KentekenInfoResponse.ClientSuwi.Aansprakelijke? {
         val kentekenInfoRequest = createKentekenRequest(kenteken)
         val rdwResponse = rdwService.kentekenInfo(kentekenInfoRequest)
         var aansprakelijke: KentekenInfoResponse.ClientSuwi.Aansprakelijke? = null
@@ -117,9 +118,10 @@ class SuwinetRdwService(
             when (it) {
                 is KentekenInfoResponse.ClientSuwi -> aansprakelijke = it.aansprakelijke.firstOrNull()
                 is FWI -> {
-                    val msg = it.foutOrWaarschuwingOrInformatie.joinToString { melding ->
-                        "${melding.value.code}: ${melding.name} / ${melding.value}\n"
-                    }
+                    val msg =
+                        it.foutOrWaarschuwingOrInformatie.joinToString { melding ->
+                            "${melding.value.code}: ${melding.name} / ${melding.value}\n"
+                        }
                     logger.info { "FWI: $msg" }
                 }
             }
@@ -154,24 +156,25 @@ class SuwinetRdwService(
         }
     }
 
-    private fun VoertuigbezitInfoPersoonResponse.unwrapResponse(): List<String> {
-        return if (!clientSuwi.isNullOrEmpty()) {
+    private fun VoertuigbezitInfoPersoonResponse.unwrapResponse(): List<String> =
+        if (!clientSuwi.isNullOrEmpty()) {
             clientSuwi[0].aansprakelijke.map {
                 it.voertuig.kentekenVoertuig
             }
         } else if (fwi != null) {
             throw SuwinetResultFWIException(
-                fwi.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" }
+                fwi.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" },
             )
         } else {
             listOf()
         }
-    }
 
-    private fun getAvailableProperties(info: Any): List<String> =
-        dynamicResponseFactory.toFlatMap(info).keys.toList()
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
         dynamicProperties.forEach { prop ->
@@ -189,7 +192,6 @@ class SuwinetRdwService(
         rdwService: RDW,
         dynamicProperties: List<String>,
     ): DynamicResponseDto {
-
         this.rdwService = rdwService
 
         logger.info { "retrieving RDW Kentekens from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
@@ -200,7 +202,7 @@ class SuwinetRdwService(
             val wrapper = KentekensWrapper(kentekens)
             DynamicResponseDto(
                 properties = getAvailableProperties(wrapper),
-                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties)
+                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties),
             )
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting RDW kentekens" }
@@ -219,18 +221,20 @@ class SuwinetRdwService(
         rdwService: RDW,
         dynamicProperties: List<String>,
     ): DynamicResponseDto {
-
         this.rdwService = rdwService
 
-        logger.info { "retrieving RDW Voertuig info for kenteken from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "retrieving RDW Voertuig info for kenteken from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         return try {
-            val aansprakelijke = retrieveAansprakelijkeInfoFromSuwi(kenteken)
-                ?: return DynamicResponseDto(emptyList(), Any())
+            val aansprakelijke =
+                retrieveAansprakelijkeInfoFromSuwi(kenteken)
+                    ?: return DynamicResponseDto(emptyList(), Any())
             val wrapper = VoertuigenWrapper(listOf(aansprakelijke))
             DynamicResponseDto(
                 properties = getAvailableProperties(wrapper),
-                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties)
+                dynamicProperties = getDynamicProperties(wrapper, dynamicProperties),
             )
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting RDW voertuig info" }
@@ -244,9 +248,13 @@ class SuwinetRdwService(
         }
     }
 
-    private data class KentekensWrapper(val kentekens: List<String>)
+    private data class KentekensWrapper(
+        val kentekens: List<String>,
+    )
 
-    private data class VoertuigenWrapper(val aansprakelijken: List<KentekenInfoResponse.ClientSuwi.Aansprakelijke>)
+    private data class VoertuigenWrapper(
+        val aansprakelijken: List<KentekenInfoResponse.ClientSuwi.Aansprakelijke>,
+    )
 
     companion object {
         private const val SERVICE_PATH = "RDWDossierGSD-v0200"

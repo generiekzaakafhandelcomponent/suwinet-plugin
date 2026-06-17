@@ -15,18 +15,19 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.xml.ws.WebServiceException
 import jakarta.xml.ws.soap.SOAPFaultException
 import org.springframework.util.StringUtils
-import kotlin.collections.emptyMap
 
 class SuwinetDuoStudiefinancieringInfoService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory
+    private val dynamicResponseFactory: DynamicResponseFactory,
 ) {
-
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
+    fun setConfig(
+        soapClientConfig: SuwinetSOAPClientConfig,
+        suffix: String?,
+    ) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -43,23 +44,26 @@ class SuwinetDuoStudiefinancieringInfoService(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig
+                soapClientConfig.authConfig,
             )
     }
 
     fun getStudiefinancieringInfoByBsn(
         bsn: String,
         duoStudiefinancieringInfo: DUOInfo,
-        dynamicProperties: List<String> = listOf()
+        dynamicProperties: List<String> = listOf(),
     ): DynamicResponseDto? {
-        logger.info { "Getting DUO studiefinanciering from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
+        logger.info {
+            "Getting DUO studiefinanciering from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
+        }
 
         try {
-            val studiefinancieringInfoRequest = objectFactory
-                .createDUOStudiefinancieringInfo()
-                .apply {
-                    burgerservicenr = bsn
-                }
+            val studiefinancieringInfoRequest =
+                objectFactory
+                    .createDUOStudiefinancieringInfo()
+                    .apply {
+                        burgerservicenr = bsn
+                    }
 
             val response: DUOStudiefinancieringInfoResponse =
                 duoStudiefinancieringInfo.duoStudiefinancieringInfo(studiefinancieringInfoRequest)
@@ -70,42 +74,42 @@ class SuwinetDuoStudiefinancieringInfoService(
             logger.error(e) { "SOAPFaultException - Error getting DUO studiefinanciering info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
             // WebServiceExceptions occur when the service is down
         } catch (e: WebServiceException) {
             logger.error(e) { "WebServiceException - Error getting DUO studiefinanciering info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         } catch (e: Exception) {
             logger.error(e) { "Other Exception - Error getting DUO studiefinanciering info" }
             throw SuwinetError(
                 e,
-                "SUWINET_CONNECT_ERROR"
+                "SUWINET_CONNECT_ERROR",
             )
         }
     }
 
     private fun DUOStudiefinancieringInfoResponse.unwrapResponse(dynamicProperties: List<String>): DynamicResponseDto? {
-
-        val responseValue = content
-            .firstOrNull()
-            ?.value
-            ?: throw IllegalStateException("DUOStudiefinancieringInfoResponse contains no value")
+        val responseValue =
+            content
+                .firstOrNull()
+                ?.value
+                ?: throw IllegalStateException("DUOStudiefinancieringInfoResponse contains no value")
 
         return when (responseValue) {
             is DUOStudiefinancieringInfoResponse.ClientSuwi -> {
                 DynamicResponseDto(
                     properties = getAvailableProperties(responseValue),
-                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties)
+                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties),
                 )
             }
 
             is FWI -> {
                 throw SuwinetResultFWIException(
-                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" }
+                    responseValue.foutOrWaarschuwingOrInformatie.joinToString { "${it.name} / ${it.value}\n" },
                 )
             }
 
@@ -120,10 +124,12 @@ class SuwinetDuoStudiefinancieringInfoService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> =
-        dynamicResponseFactory.toFlatMap(info).keys.toList()
+    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
 
-    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
+    private fun getDynamicProperties(
+        info: Any,
+        dynamicProperties: List<String>,
+    ): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
         dynamicProperties.forEach { prop ->

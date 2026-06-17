@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.ritense.valtimoplugins.suwinet.service
 
 import com.fasterxml.jackson.databind.JsonNode
@@ -5,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ritense.valtimo.TestHelper
 import com.ritense.valtimo.implementation.dkd.KadasterInfo.*
-
 import com.ritense.valtimoplugins.BaseTest
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClient
 import com.ritense.valtimoplugins.suwinet.client.SuwinetSOAPClientConfig
@@ -55,37 +56,39 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_Nietsgevonden.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_Nietsgevonden.xml",
+            ),
         )
 
-        val result = suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
-            bsn,
-            kadasterService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
+                bsn,
+                kadasterService,
+                dynamicProperties = listOf("*"),
+            )
 
         // then
         assertEquals("result should be null when not found", null, result)
     }
 
     @Test
-    fun `retrieving kadaster persoonsinfo should return all kadastraale aanduidingen including those with missing object info`() {
+    fun `retrieving kadaster persoonsinfo returns all aanduidingen including those missing object info`() {
         // given
         val bsn = "111111110"
 
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_111111110_object_nietgevonden.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_111111110_object_nietgevonden.xml",
+            ),
         )
 
-        val result = suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
-            bsn,
-            kadasterService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
+                bsn,
+                kadasterService,
+                dynamicProperties = listOf("*"),
+            )
 
         printResult(result!!.dynamicProperties)
         // then
@@ -96,7 +99,7 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         val mapper = jacksonObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
         val json = mapper.valueToTree<JsonNode>(result)
         val jout = mapper.writeValueAsString(json)
-        logger.info { "----- ${jout}" }
+        logger.info { "----- $jout" }
     }
 
     @Test
@@ -107,15 +110,16 @@ internal class SuwinetKadasterInfoServiceTest : BaseTest() {
         // when
         whenever(kadasterService.persoonsInfo(any(PersoonsInfo::class.java))).thenReturn(
             testHelper.unmarshal<PersoonsInfoResponse>(
-                "KadasterDossierGSD_PersoonsInfo_111111110.xml"
-            )
+                "KadasterDossierGSD_PersoonsInfo_111111110.xml",
+            ),
         )
 
-        val result = suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
-            bsn,
-            kadasterService,
-            dynamicProperties = listOf("*")
-        )
+        val result =
+            suwinetKadasterInfoService.getKadastraleAanduidingenByBsn(
+                bsn,
+                kadasterService,
+                dynamicProperties = listOf("*"),
+            )
 
         // then
         assertEquals("found kadastrale aanduidingen should be 4", 4, (result!!.dynamicProperties as List<*>).size)

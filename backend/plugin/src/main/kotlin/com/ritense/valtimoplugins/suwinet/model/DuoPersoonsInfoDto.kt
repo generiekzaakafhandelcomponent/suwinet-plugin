@@ -6,14 +6,13 @@ data class DuoPersoonsInfoDto(
     val onderwijsOvereenkomst: List<DuoOnderwijsOvereenkomst>,
     val resultaatOpleiding: List<ResultaatOpleidingGeregistrDuo>,
     val propertiesMap: Map<String, Any?> = mapOf(),
-    val properties: List<String> = listOf()
+    val properties: List<String> = listOf(),
 ) {
     data class DuoOnderwijsOvereenkomst(
         val brin: String,
         val datumInschrijvingOpleiding: String,
         val datumUitschrijvingOpleiding: String,
-        val deelnameOpleidingGeregistrDuo: List<DeelnameOpleidingGeregistrDuo>
-
+        val deelnameOpleidingGeregistrDuo: List<DeelnameOpleidingGeregistrDuo>,
     ) {
         data class DeelnameOpleidingGeregistrDuo(
             val datumBeginDeelnameOpleiding: String,
@@ -22,14 +21,14 @@ data class DuoPersoonsInfoDto(
             val codeInschrijvingsvorm: String,
             val codeOnderwijsvorm: String,
             val codeLeerwegMbo: String,
-            val inhoudDeelnameOpleiding: InhoudDeelnameOpleidingDuo
+            val inhoudDeelnameOpleiding: InhoudDeelnameOpleidingDuo,
         ) {
             data class InhoudDeelnameOpleidingDuo(
                 val naamOpleidingKortDuo: String,
                 val codeNiveauOpleidingDuo: String,
                 val omsStudiegebied: String,
                 val omsStudieinhoud: String,
-                val omsStudieuitstroom: String
+                val omsStudieuitstroom: String,
             )
         }
     }

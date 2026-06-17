@@ -2,7 +2,6 @@ package com.ritense.valtimoplugins.suwinet.client
 
 import com.ritense.valtimoplugins.suwinetauth.plugin.SuwinetAuth
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.xml.ws.soap.AddressingFeature
 import org.apache.cxf.ext.logging.LoggingFeature
 import org.apache.cxf.frontend.ClientProxy
 import org.apache.cxf.interceptor.LoggingInInterceptor
@@ -14,56 +13,66 @@ import org.apache.cxf.transports.http.configuration.ConnectionType
 import org.apache.cxf.transports.http.configuration.HTTPClientPolicy
 import org.apache.cxf.ws.addressing.WSAddressingFeature
 
-
 class SuwinetSOAPClient {
-
-    inline fun <reified T : Any> getService(url: String, connectionTimeout: Int?, receiveTimeout: Int?, authConfig: SuwinetAuth): T {
+    inline fun <reified T : Any> getService(
+        url: String,
+        connectionTimeout: Int?,
+        receiveTimeout: Int?,
+        authConfig: SuwinetAuth,
+    ): T {
         val clazz = T::class.java
 
-        val soapService = with(JaxWsProxyFactoryBean()) {
-            this.serviceClass = clazz
-            address = url
+        val soapService =
+            with(JaxWsProxyFactoryBean()) {
+                this.serviceClass = clazz
+                address = url
 
-            // address feature for including SOAPAction in tag
-            val addressingFeature = WSAddressingFeature().apply {
-                isAddressingRequired = false
+                // address feature for including SOAPAction in tag
+                val addressingFeature =
+                    WSAddressingFeature().apply {
+                        isAddressingRequired = false
+                    }
+
+                val loggingFeature: LoggingFeature = LoggingFeature()
+                loggingFeature.setPrettyLogging(true)
+                loggingFeature.setVerbose(true)
+                loggingFeature.setLogMultipart(true)
+                loggingFeature.addSensitiveElementNames(
+                    setOf<String>(
+                        "Burgerservicenr",
+                        "Voornamen",
+                        "SignificantDeelVanDeAchternaam",
+                        "ANr",
+                        "Geboortedat",
+                        "Postcd",
+                        "Straatnaam",
+                        "Huisnr",
+                        "Woonplaatsnaam",
+                    ),
+                )
+                loggingFeature.addSensitiveProtocolHeaderNames(
+                    setOf<String>(
+                        "Authorization",
+                        "x-opentunnel-api-key",
+                    ),
+                )
+                this.features.add(addressingFeature)
+                this.features.add(loggingFeature)
+
+                create() as T
             }
-
-            val loggingFeature: LoggingFeature = LoggingFeature()
-            loggingFeature.setPrettyLogging(true)
-            loggingFeature.setVerbose(true);
-            loggingFeature.setLogMultipart(true);
-            loggingFeature.addSensitiveElementNames(
-                setOf<String>(
-                    "Burgerservicenr",
-                    "Voornamen",
-                    "SignificantDeelVanDeAchternaam",
-                    "ANr",
-                    "Geboortedat",
-                    "Postcd",
-                    "Straatnaam",
-                    "Huisnr",
-                    "Woonplaatsnaam"
-                )
-            )
-            loggingFeature.addSensitiveProtocolHeaderNames(
-                setOf<String>(
-                    "Authorization",
-                    "x-opentunnel-api-key"
-                )
-            )
-            this.features.add(addressingFeature)
-            this.features.add(loggingFeature)
-
-            create() as T
-        }
 
         setDefaultPolicies(soapService, authConfig, connectionTimeout, receiveTimeout)
 
         return soapService
     }
 
-    fun setDefaultPolicies(service: Any, authConfig: SuwinetAuth, connectionTimeout: Int?, receiveTimeout: Int?) {
+    fun setDefaultPolicies(
+        service: Any,
+        authConfig: SuwinetAuth,
+        connectionTimeout: Int?,
+        receiveTimeout: Int?,
+    ) {
         val client = ClientProxy.getClient(service)
         with(client.requestContext) {
             // Disable strict action checking
@@ -89,7 +98,7 @@ class SuwinetSOAPClient {
             this["org.apache.cxf.ws.addressing.MAPAggregator.addressingDisabled"] = true
         }
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             // deprecated loggers do log RAW messages
             client.inInterceptors.add(LoggingInInterceptor())
             client.outInterceptors.add(LoggingOutInterceptor())
