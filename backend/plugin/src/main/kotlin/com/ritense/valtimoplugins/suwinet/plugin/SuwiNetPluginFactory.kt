@@ -20,11 +20,10 @@ class SuwiNetPluginFactory(
     private val suwinetRdwService: SuwinetRdwService,
     private val suwinetSvbPersoonsInfoService: SuwinetSvbPersoonsInfoService,
     private val suwinetUwvPersoonsIkvService: SuwinetUwvPersoonsIkvService,
-    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService
+    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService,
 ) : PluginFactory<SuwiNetPlugin>(pluginService) {
-
-    override fun create(): SuwiNetPlugin {
-        return SuwiNetPlugin(
+    override fun create(): SuwiNetPlugin =
+        SuwiNetPlugin(
             suwinetBrpInfoService,
             suwinetDuoPersoonsInfoService,
             suwinetDuoStudiefinancieringInfoService,
@@ -32,7 +31,6 @@ class SuwiNetPluginFactory(
             suwinetRdwService,
             suwinetSvbPersoonsInfoService,
             suwinetUwvPersoonsIkvService,
-            suwinetBijstandsregelingenService
+            suwinetBijstandsregelingenService,
         )
-    }
 }

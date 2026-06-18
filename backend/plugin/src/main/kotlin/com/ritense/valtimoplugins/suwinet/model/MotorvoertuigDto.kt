@@ -3,7 +3,7 @@ package com.ritense.valtimoplugins.suwinet.model
 import com.fasterxml.jackson.databind.node.ObjectNode
 
 data class MotorvoertuigDto(
-    val motorVoertuigen: List<Motorvoertuig>
+    val motorVoertuigen: List<Motorvoertuig>,
 ) {
     data class Motorvoertuig(
         val kenteken: String,
@@ -12,6 +12,6 @@ data class MotorvoertuigDto(
         val merk: String,
         val model: String,
         val datumEersteInschrijving: String,
-        val datumRegistratieAansprakelijkheid: String
+        val datumRegistratieAansprakelijkheid: String,
     )
 }

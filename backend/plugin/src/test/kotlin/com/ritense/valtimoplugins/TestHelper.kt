@@ -8,23 +8,22 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.ritense.document.domain.impl.JsonDocumentContent
+import jakarta.xml.bind.JAXBContext
+import jakarta.xml.bind.JAXBException
 import org.springframework.core.io.DefaultResourceLoader
 import java.io.IOException
 import java.time.LocalDate
-import jakarta.xml.bind.JAXBContext
-import jakarta.xml.bind.JAXBException
 
 object TestHelper {
-
     const val DOCUMENT_ID = "6218600e-5012-4320-9ca6-40fd58e0a297"
     const val CASE_ID = "6668600e-5012-4320-9ca6-40fd58e0a297"
     const val CONNECTOR_NAME = "objects-api-connector"
     val VARIABLE_MAP = mapOf("resultaat" to "testResultaat", "status" to "testStatus")
     val BESLUIT_TYPE = mapOf("besluitType" to "testBesluitType")
     val PROCESS_DEFINITION_ID_INFORMEREN_AANVRAGER_PROCESS = "ooievaarspas-informeren-aanvrager"
-    val ZONEDDATETIMESTRING_START="2007-12-03T10:15:30+01:00"
-    val ZONEDDATETIMESTRING_END="2022-10-11T22:05:10+03:00"
-    val ZONEDDATETIMESTRING_FUTURE="5022-10-11T22:05:10+03:00"
+    val ZONEDDATETIMESTRING_START = "2007-12-03T10:15:30+01:00"
+    val ZONEDDATETIMESTRING_END = "2022-10-11T22:05:10+03:00"
+    val ZONEDDATETIMESTRING_FUTURE = "5022-10-11T22:05:10+03:00"
     val CURRENT_DATE: LocalDate = LocalDate.now()
     val resourceLoader = DefaultResourceLoader()
 
@@ -63,14 +62,13 @@ object TestHelper {
         return JsonDocumentContent.build(trainingJson)
     }
 
-    fun trainingsCreatieObjectData(): LinkedHashMap<String, Any> {
-        return linkedMapOf(
-            "training" to trainingsObjectData()
+    fun trainingsCreatieObjectData(): LinkedHashMap<String, Any> =
+        linkedMapOf(
+            "training" to trainingsObjectData(),
         )
-    }
 
-    private fun trainingsObjectData(): LinkedHashMap<String, Any> {
-        return linkedMapOf(
+    private fun trainingsObjectData(): LinkedHashMap<String, Any> =
+        linkedMapOf(
             "naam" to "Testtraining",
             "lokaal" to "1",
             "dagdeel" to "ochtend",
@@ -84,13 +82,12 @@ object TestHelper {
                         "emailadres" to "piet@klaassen.nl",
                         "tussenvoegsel" to "",
                         "volledigeNaam" to "Pieter Klaassen",
-                        "telefoonnummer" to "0612345678"
-                    )
+                        "telefoonnummer" to "0612345678",
+                    ),
                 ),
             "maxAantalDeelnemers" to "10",
             "uitersteInschrijfdatum" to "2022-07-15T00:00:00+02:00",
             "datumLaatsteTrainingsdag" to "2022-07-21",
-            "status" to "GEPLAND"
+            "status" to "GEPLAND",
         )
-    }
 }

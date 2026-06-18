@@ -18,7 +18,7 @@ package com.ritense.valtimoplugins.suwinet.model
 
 import java.io.Serializable
 
-data class DynamicResponseDto (
+data class DynamicResponseDto(
     val properties: List<String> = listOf(),
-    val dynamicProperties: Any
-):  Serializable
+    val dynamicProperties: Any,
+) : Serializable

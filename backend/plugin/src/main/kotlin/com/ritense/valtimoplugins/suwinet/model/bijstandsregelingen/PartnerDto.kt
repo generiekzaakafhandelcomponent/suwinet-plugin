@@ -1,5 +1,5 @@
 package com.ritense.valtimoplugins.suwinet.model.bijstandsregelingen
 
-data class PartnerDto (
+data class PartnerDto(
     val burgerservicenr: String?,
-    )
+)

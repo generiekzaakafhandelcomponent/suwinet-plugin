@@ -6,5 +6,5 @@ data class SuwinetSOAPClientConfig(
     val baseUrl: String,
     val connectionTimeout: Int?,
     val receiveTimeout: Int?,
-    val authConfig: SuwinetAuth
+    val authConfig: SuwinetAuth,
 )
