@@ -1,16 +1,16 @@
 {
   "name": "@valtimo-plugins/suwinet",
   "license": "EUPL-1.2",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "scripts": {
-    "build": "ng-packagr -p ng-package.json"
+    "build": "ng build @valtimo-plugins/suwinet"
   },
   "peerDependencies": {
-    "@angular/common": "^17.2.2",
-    "@angular/core": "^17.2.2"
+    "@angular/common": "19.2.20",
+    "@angular/core": "19.2.20"
   },
   "dependencies": {
-    "tslib": "2.6.3"
+    "tslib": "2.8.1"
   },
   "devDependencies": {
     "ng-packagr": "^17.2.0"
