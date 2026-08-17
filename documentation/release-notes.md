@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de Suwinet-plugin.
 
+## 3.0.1
+
+Valtimo bijgewerkt naar versie 13.41.0.
+
 ## 3.0.0
 Geschikt gemaakt voor Valtimo v13 en bijgewerkt naar de laatste v12-wijzigingen, met fixes voor de Angular-build na een Valtimo-dependency-update.
 
