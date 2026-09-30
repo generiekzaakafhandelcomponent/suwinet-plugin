@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de Suwinet-plugin.
 
+## 3.0.2
+
+Ondersteuning voor Valtimo 13.48.0.
+
 ## 3.0.1
 
 Valtimo bijgewerkt naar versie 13.41.0.
