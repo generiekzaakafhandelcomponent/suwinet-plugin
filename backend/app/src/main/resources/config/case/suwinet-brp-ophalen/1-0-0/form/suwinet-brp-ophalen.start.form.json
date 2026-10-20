@@ -5,7 +5,7 @@
             "label": "BSN",
             "applyMaskOn": "change",
             "tableView": true,
-            "key": "gegevensVanuitAanvraag.persoon.bsn",
+            "key": "pv.bsn",
             "inputMask": "999999999",
             "validate": {
                 "required": true,

@@ -11,23 +11,22 @@ import com.ritense.valtimoplugins.suwinet.dynamic.DynamicResponseFactory
 import com.ritense.valtimoplugins.suwinet.error.SuwinetError
 import com.ritense.valtimoplugins.suwinet.exception.SuwinetResultNotFoundException
 import com.ritense.valtimoplugins.suwinet.model.DynamicResponseDto
+import com.ritense.valtimoplugins.suwinet.util.PeriodFilter
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.xml.ws.WebServiceException
 import jakarta.xml.ws.soap.SOAPFaultException
+import java.time.LocalDate
 import org.springframework.util.StringUtils
 
 class SuwinetUwvPersoonsIkvService(
     private val suwinetSOAPClient: SuwinetSOAPClient,
-    private val dynamicResponseFactory: DynamicResponseFactory,
+    private val dynamicResponseFactory: DynamicResponseFactory
 ) {
     private lateinit var soapClientConfig: SuwinetSOAPClientConfig
 
     var suffix: String? = ""
 
-    fun setConfig(
-        soapClientConfig: SuwinetSOAPClientConfig,
-        suffix: String?,
-    ) {
+    fun setConfig(soapClientConfig: SuwinetSOAPClientConfig, suffix: String?) {
         this.soapClientConfig = soapClientConfig
         this.suffix = suffix
     }
@@ -44,7 +43,7 @@ class SuwinetUwvPersoonsIkvService(
                 completeUrl,
                 soapClientConfig.connectionTimeout,
                 soapClientConfig.receiveTimeout,
-                soapClientConfig.authConfig,
+                soapClientConfig.authConfig
             )
     }
 
@@ -52,21 +51,21 @@ class SuwinetUwvPersoonsIkvService(
         bsn: String,
         uwvIkvInfoService: UWVIkvInfo,
         dynamicProperties: List<String> = listOf(),
+        periodStart: LocalDate? = null,
+        periodEnd: LocalDate? = null
     ): DynamicResponseDto? {
-        logger.info {
-            "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}"
-        }
+        logger.info { "Getting UWV inkomsten info from ${soapClientConfig.baseUrl + SERVICE_PATH + (this.suffix ?: "")}" }
         try {
-            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo =
-                objectFactory
-                    .createUWVPersoonsIkvInfo()
-                    .apply {
-                        burgerservicenr = bsn
-                    }
+            val uwvPersoonsIkvInfo: UWVPersoonsIkvInfo = objectFactory
+                .createUWVPersoonsIkvInfo()
+                .apply {
+                    burgerservicenr = bsn
+                }
 
             val uwvPersoonsIkvInfoResponse: UWVPersoonsIkvInfoResponse =
                 uwvIkvInfoService.uwvPersoonsIkvInfo(uwvPersoonsIkvInfo)
-            return uwvPersoonsIkvInfoResponse.unwrapResponse(dynamicProperties)
+            return uwvPersoonsIkvInfoResponse.unwrapResponse(dynamicProperties, periodStart, periodEnd)
+
         } catch (e: SOAPFaultException) {
             logger.error(e) { "SOAPFaultException - Error getting UWV inkomsten info" }
             throw SuwinetError(e, "SUWINET_CONNECT_ERROR")
@@ -79,19 +78,26 @@ class SuwinetUwvPersoonsIkvService(
         }
     }
 
-    private fun UWVPersoonsIkvInfoResponse.unwrapResponse(dynamicProperties: List<String>): DynamicResponseDto? {
-        val responseValue =
-            content
-                .firstOrNull()
-                ?.value
-                ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
+    private fun UWVPersoonsIkvInfoResponse.unwrapResponse(
+        dynamicProperties: List<String>,
+        periodStart: LocalDate? = null,
+        periodEnd: LocalDate? = null
+    ): DynamicResponseDto? {
+        val responseValue = content
+            .firstOrNull()
+            ?.value
+            ?: throw IllegalStateException("UWVPersoonsIkvInfoResponse contains no value")
 
         return when (responseValue) {
-            is UWVPersoonsIkvInfoResponse.ClientSuwi ->
+            is UWVPersoonsIkvInfoResponse.ClientSuwi -> {
+                if (periodStart != null && periodEnd != null) {
+                    responseValue.applyPeriodFilter(periodStart, periodEnd)
+                }
                 DynamicResponseDto(
                     properties = getAvailableProperties(responseValue),
-                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties),
+                    dynamicProperties = getDynamicProperties(responseValue, dynamicProperties)
                 )
+            }
 
             is FWI -> {
                 logger.info { "content: ${content[0].name}" }
@@ -109,12 +115,38 @@ class SuwinetUwvPersoonsIkvService(
         }
     }
 
-    private fun getAvailableProperties(info: Any): List<String> = dynamicResponseFactory.toFlatMap(info).keys.toList()
+    /**
+     * Mutates the ClientSuwi response in-place: removes inkomstenverhoudingen, inkomstenperioden,
+     * and inkomstenopgaven that do not overlap with [periodStart, periodEnd].
+     *
+     * XSD date fields use yyyyMMdd format (sml:Datum).
+     * Field mapping from BodyReaction.xsd:
+     *   Inkomstenverhouding: DatBIkv / DatEIkv
+     *   Inkomstenperiode:    DatBIkp / DatEIkp
+     *   Inkomstenopgave:     DatBIko / DatEIko
+     */
+    private fun UWVPersoonsIkvInfoResponse.ClientSuwi.applyPeriodFilter(
+        periodStart: LocalDate,
+        periodEnd: LocalDate
+    ) {
+        inkomstenverhouding.removeIf { ikv ->
+            !PeriodFilter.overlaps(ikv.datBIkv, ikv.datEIkv, periodStart, periodEnd)
+        }
+        inkomstenverhouding.forEach { ikv ->
+            ikv.inkomstenperiode.removeIf { ikp ->
+                !PeriodFilter.overlaps(ikp.datBIkp, ikp.datEIkp, periodStart, periodEnd)
+            }
+            ikv.inkomstenopgave.removeIf { iko ->
+                !PeriodFilter.overlaps(iko.datBIko, iko.datEIko, periodStart, periodEnd)
+            }
+        }
+    }
 
-    private fun getDynamicProperties(
-        info: Any,
-        dynamicProperties: List<String>,
-    ): Any {
+    private fun getAvailableProperties(info: Any): List<String> {
+        return dynamicResponseFactory.toFlatMap(info).keys.toList()
+    }
+
+    private fun getDynamicProperties(info: Any, dynamicProperties: List<String>): Any {
         val propertiesMap: MutableMap<String, Any?> = mutableMapOf()
         val flatMap = dynamicResponseFactory.toFlatMap(info)
 

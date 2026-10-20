@@ -1,6 +1,6 @@
 [
     {
-        "processDefinitionKey": "suwinet-brp-ophalen",
+        "processDefinitionKey": "generic-suwinet-ophalen-brp-brongegevens",
         "canInitializeDocument": true,
         "startableByUser": false
     }
