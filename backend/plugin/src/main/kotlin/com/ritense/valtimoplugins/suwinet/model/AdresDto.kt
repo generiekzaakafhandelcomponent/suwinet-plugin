@@ -10,5 +10,5 @@ data class AdresDto(
     val postcode: String,
     val woonplaatsnaam: String,
     val aanduidingBijHuisnummer: String? = null,
-    val locatieomschrijving: String,
+    val locatieomschrijving: String
 ) : Serializable

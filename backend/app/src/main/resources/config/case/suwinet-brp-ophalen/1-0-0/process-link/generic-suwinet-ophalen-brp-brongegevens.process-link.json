@@ -1,0 +1,56 @@
+[
+  {
+    "activityId": "BRPOphalenStartEvent",
+    "activityType": "bpmn:StartEvent:start",
+    "processLinkType": "form",
+    "formDefinitionName": "suwinet-brp-ophalen.start"
+  },
+  {
+    "actionProperties": {
+      "bsn": "pv:bsn",
+      "resultProcessVariableName": "brpPersoonsgegevensInfoRaw",
+      "dynamicProperties": [
+        "*"
+      ],
+      "suffix": ""
+    },
+    "activityId": "OphalenBRPPersoonsgegevensTask",
+    "activityType": "bpmn:ServiceTask:start",
+    "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+    "pluginDefinitionKey": "suwinet",
+    "pluginActionDefinitionKey": "get-brp-persoonsgegevens",
+    "processLinkType": "plugin"
+  },
+  {
+    "actionProperties": {
+      "bsn": "pv:partnerBsn",
+      "resultProcessVariableName": "brpPersoonsgegevensPartnerInfoRaw",
+      "dynamicProperties": [
+        "*"
+      ],
+      "suffix": ""
+    },
+    "activityId": "OphalenBRPPartnerGegevensTask",
+    "activityType": "bpmn:ServiceTask:start",
+    "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+    "pluginDefinitionKey": "suwinet",
+    "pluginActionDefinitionKey": "get-brp-partner-persoonsgegevens",
+    "processLinkType": "plugin"
+  },
+  {
+    "actionProperties": {
+      "kinderenBsns": "pv:kinderenBsns",
+      "resultProcessVariableName": "brpPersoonsgegevensKinderenInfoRaw",
+      "dynamicProperties": [
+        "*"
+      ],
+      "suffix": ""
+    },
+    "activityId": "OphalenBRPKinderenGegevensTask",
+    "activityType": "bpmn:ServiceTask:start",
+    "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+    "pluginDefinitionKey": "suwinet",
+    "pluginActionDefinitionKey": "get-brp-kinderen-persoonsgegevens",
+    "processLinkType": "plugin"
+  }
+]
