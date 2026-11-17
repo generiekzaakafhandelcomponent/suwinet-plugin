@@ -520,7 +520,7 @@ services:
 
   suwinet-simulator:
     container_name: plugin-docker-compose-suwinet-simulator
-    image: ghcr.io/generiekzaakafhandelcomponent/suwinet-simulator:1.0.0-202601021221.main.82e07298
+    image: ghcr.io/generiekzaakafhandelcomponent/suwinet-simulator:1.11.0-202611171315.main.841e4d8e
     platform: linux/amd64
     environment:
       - SUWINET_USER=user

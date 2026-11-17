@@ -1,0 +1,7 @@
+[
+    {
+        "processDefinitionKey": "generic-suwinet-ophalen-uwv-brongegevens",
+        "canInitializeDocument": true,
+        "startableByUser": false
+    }
+]

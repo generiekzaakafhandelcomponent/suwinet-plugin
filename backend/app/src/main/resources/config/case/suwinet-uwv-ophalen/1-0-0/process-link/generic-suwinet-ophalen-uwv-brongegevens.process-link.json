@@ -1,0 +1,40 @@
+[
+  {
+    "activityId": "UWVOphalenStartEvent",
+    "activityType": "bpmn:StartEvent:start",
+    "processLinkType": "form",
+    "formDefinitionName": "suwinet-uwv-ophalen.start"
+  },
+  {
+    "actionProperties": {
+      "bsn": "doc:gegevensVanuitAanvraag.bsn",
+      "resultProcessVariableName": "uwvInkomstenInfoRaw",
+      "dynamicProperties": [
+        "*"
+      ],
+      "suffix": ""
+    },
+    "activityId": "OphalenUWVInkomstenTask",
+    "activityType": "bpmn:ServiceTask:start",
+    "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+    "pluginDefinitionKey": "suwinet",
+    "pluginActionDefinitionKey": "get-uwv-inkomsten-info",
+    "processLinkType": "plugin"
+  },
+  {
+    "actionProperties": {
+      "bsn": "doc:gegevensVanuitAanvraag.bsn",
+      "resultProcessVariableName": "uwvWerknemersverzekeringenInfoRaw",
+      "dynamicProperties": [
+        "*"
+      ],
+      "suffix": ""
+    },
+    "activityId": "OphalenUWVWerknemersverzekeringenTask",
+    "activityType": "bpmn:ServiceTask:start",
+    "pluginConfigurationId": "744533ea-28c9-434c-80bb-542967b477eb",
+    "pluginDefinitionKey": "suwinet",
+    "pluginActionDefinitionKey": "get-uwv-werknemersverzekeringen-info",
+    "processLinkType": "plugin"
+  }
+]

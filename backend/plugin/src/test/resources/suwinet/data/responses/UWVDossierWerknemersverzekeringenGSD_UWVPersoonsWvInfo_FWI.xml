@@ -1,0 +1,11 @@
+<smls:UWVPersoonsWvInfoResponse xmlns:smls="http://bkwi.nl/SuwiML/Diensten/UWVDossierWerknemersverzekeringenGSD/v0200">
+    <fwi:FWI xmlns:fwi="http://bkwi.nl/SuwiML/FWI/v0205">
+        <Fout>
+            <Code>001</Code>
+            <Tekst>Supplier uwv returned an error</Tekst>
+            <Bron>
+                <DN>cn=SUWI-UWV,o=UWV,c=nl</DN>
+            </Bron>
+        </Fout>
+    </fwi:FWI>
+</smls:UWVPersoonsWvInfoResponse>

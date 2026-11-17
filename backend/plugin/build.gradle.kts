@@ -248,6 +248,26 @@ tasks.register<Wsdl2Java>("genUWVDossierInkomstenGSD") {
     }
 }
 
+tasks.register<Wsdl2Java>("genUWVDossierWerknemersverzekeringenGSD") {
+    toolOptions {
+        wsdl = "src/main/resources/soap/suwinet/Diensten/UWVDossierWerknemersverzekeringenGSD/v0200-b01/Impl/BKWI.wsdl"
+        outputDir.set(
+            layout.buildDirectory
+                .dir("generated-sources/cxf/genUWVDossierWerknemersverzekeringenGSD")
+                .get()
+                .asFile,
+        )
+        markGenerated.set(true)
+        packageNames.set(listOf("com.ritense.valtimoplugins.dkd.uwvdossierwerknemersverzekeringengsd"))
+        extendedSoapHeaders.set(true)
+        autoNameResolution.set(true)
+    }
+    allJvmArgs = listOf("-Duser.language=en", "-Duser.country=NL")
+    doFirst {
+        classpath = configurations["runtimeClasspath"]
+    }
+}
+
 tasks.register<Wsdl2Java>("genBijstandsregelingen") {
     toolOptions {
         wsdl = "src/main/resources/soap/suwinet/Diensten/Bijstandsregelingen/v0500-b04/Impl/BKWI.wsdl"
@@ -277,5 +297,6 @@ tasks.named("compileKotlin") {
         "genRDWDossierGSD",
         "genSVBDossierPersoonGSD",
         "genUWVDossierInkomstenGSD",
+        "genUWVDossierWerknemersverzekeringenGSD",
     )
 }

@@ -107,3 +107,9 @@ export interface UwvInkomstenPersoonInfoConfig extends BaseActionConfig {
     resultProcessVariableName: string;
 }
 
+export interface UwvWerknemersverzekeringenInfoConfig extends BaseActionConfig {
+    bsn: string;
+    dynamicProperties: Array<string>;
+    resultProcessVariableName: string;
+}
+

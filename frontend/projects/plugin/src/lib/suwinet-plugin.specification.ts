@@ -33,6 +33,7 @@ import {DuoPersoonsInfoComponent} from "./components/duo-persoons-info/duo-perso
 import {SvbPersoonsInfoComponent} from "./components/svb-persoons-info/svb-persoons-info.component";
 import {DuoStudiefinancieringComponent} from "./components/duo-studiefinanciering/duo-studiefinanciering.component";
 import {UwvInkomstenInfoComponent} from "./components/uwv-inkomsten-persoon-info/uwv-inkomsten-info.component";
+import {UwvWerknemersverzekeringenInfoComponent} from "./components/uwv-werknemersverzekeringen-info/uwv-werknemersverzekeringen-info.component";
 import {KadastraleObjectenComponent} from "./components/kadasterobjecten/kadastrale-objecten.component";
 import {
     BijstandsregelingenInfoComponent
@@ -57,6 +58,7 @@ const suwinetPluginSpecification: PluginSpecification = {
         'get-duo-studiefinanciering': DuoStudiefinancieringComponent,
         'get-svb-persoonsinfo': SvbPersoonsInfoComponent,
         'get-uwv-inkomsten-info': UwvInkomstenInfoComponent,
+        'get-uwv-werknemersverzekeringen-info': UwvWerknemersverzekeringenInfoComponent,
     },
     pluginTranslations: {
         nl: {
@@ -107,7 +109,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Ophalen DUO persoonsinfo',
             'get-duo-studiefinanciering': 'Ophalen DUO studiefinanciering',
             'get-svb-persoonsinfo': 'Ophalen SVB persoonsinfo',
-            'get-uwv-inkomsten-info': 'Ophalen UWV inkomsten info'
+            'get-uwv-inkomsten-info': 'Ophalen UWV inkomsten info',
+            'get-uwv-werknemersverzekeringen-info': 'Ophalen UWV werknemersverzekeringen (uitkeringen en maatregelen)'
         },
         en: {
             configurationTitle: 'Configuration name',
@@ -157,7 +160,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Retrieve DUO personal information',
             'get-duo-studiefinanciering': 'Retrieve DUO student finance information',
             'get-svb-persoonsinfo': 'Retrieve SVB personal information',
-            'get-uwv-inkomsten-info': 'Retrieve UWV income information'
+            'get-uwv-inkomsten-info': 'Retrieve UWV income information',
+            'get-uwv-werknemersverzekeringen-info': 'Retrieve UWV employee insurance benefits and sanctions'
         },
         de: {
             configurationTitle: 'Configuration name',
@@ -207,7 +211,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Abrufen von DUO-Personeninformationen',
             'get-duo-studiefinanciering': 'Abrufen von DUO-Studienfinanzierungsinformationen',
             'get-svb-persoonsinfo': 'Abrufen von SVB-Personeninformationen',
-            'get-uwv-inkomsten-info': 'Abrufen von UWV-Einkommensinformationen'
+            'get-uwv-inkomsten-info': 'Abrufen von UWV-Einkommensinformationen',
+            'get-uwv-werknemersverzekeringen-info': 'Abrufen von UWV-Arbeitnehmerversicherungsleistungen und Sanktionen'
         },
     },
 };
