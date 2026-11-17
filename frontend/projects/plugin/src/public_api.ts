@@ -37,5 +37,6 @@ export * from './lib/components/rdw-kenteken/rdw-kenteken.component';
 export * from './lib/components/rdw-voertuig/rdw-voertuig.component';
 export * from './lib/components/svb-persoons-info/svb-persoons-info.component';
 export * from './lib/components/uwv-inkomsten-persoon-info/uwv-inkomsten-info.component';
+export * from './lib/components/uwv-werknemersverzekeringen-info/uwv-werknemersverzekeringen-info.component';
 export * from './lib/components/bijstandsregelingen-info/bijstandsregelingen-info.component'
 

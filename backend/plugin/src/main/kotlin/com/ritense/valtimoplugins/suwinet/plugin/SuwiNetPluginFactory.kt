@@ -10,6 +10,7 @@ import com.ritense.valtimoplugins.suwinet.service.SuwinetKadasterInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetRdwService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetSvbPersoonsInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvPersoonsIkvService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvWerknemersverzekeringenService
 
 class SuwiNetPluginFactory(
     pluginService: PluginService,
@@ -20,7 +21,8 @@ class SuwiNetPluginFactory(
     private val suwinetRdwService: SuwinetRdwService,
     private val suwinetSvbPersoonsInfoService: SuwinetSvbPersoonsInfoService,
     private val suwinetUwvPersoonsIkvService: SuwinetUwvPersoonsIkvService,
-    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService
+    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService,
+    private val suwinetUwvWerknemersverzekeringenService: SuwinetUwvWerknemersverzekeringenService
 ) : PluginFactory<SuwiNetPlugin>(pluginService) {
 
     override fun create(): SuwiNetPlugin {
@@ -32,7 +34,8 @@ class SuwiNetPluginFactory(
             suwinetRdwService,
             suwinetSvbPersoonsInfoService,
             suwinetUwvPersoonsIkvService,
-            suwinetBijstandsregelingenService
+            suwinetBijstandsregelingenService,
+            suwinetUwvWerknemersverzekeringenService
         )
     }
 }

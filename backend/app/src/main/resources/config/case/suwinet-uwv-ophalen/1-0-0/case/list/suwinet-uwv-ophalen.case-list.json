@@ -1,0 +1,28 @@
+[
+    {
+        "title": "bsn",
+        "key": "bsn",
+        "path": "doc:gegevensVanuitAanvraag.bsn",
+        "displayType": {
+            "type": "text",
+            "displayTypeParameters": {}
+        },
+        "sortable": true,
+        "defaultSort": null,
+        "order": 0
+    },
+    {
+        "title": "",
+        "key": "createdOn",
+        "path": "case:createdOn",
+        "displayType": {
+            "type": "date",
+            "displayTypeParameters": {
+                "dateFormat": null
+            }
+        },
+        "sortable": true,
+        "defaultSort": "DESC",
+        "order": 1
+    }
+]

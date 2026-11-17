@@ -19,6 +19,7 @@ import com.ritense.valtimoplugins.suwinet.service.SuwinetKadasterInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetRdwService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetSvbPersoonsInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvPersoonsIkvService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvWerknemersverzekeringenService
 import com.ritense.valtimoplugins.suwinet.util.DateExpressionEvaluator
 import com.ritense.valtimoplugins.suwinetauth.plugin.SuwinetAuth
 import java.net.URI
@@ -41,7 +42,8 @@ class SuwiNetPlugin(
     private val suwinetRdwService: SuwinetRdwService,
     private val suwinetSvbPersoonsInfoService: SuwinetSvbPersoonsInfoService,
     private val suwinetUwvPersoonsIkvService: SuwinetUwvPersoonsIkvService,
-    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService
+    private val suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService,
+    private val suwinetUwvWerknemersverzekeringenService: SuwinetUwvWerknemersverzekeringenService
 ) {
 
     @PluginProperty(key = "authenticationPluginConfiguration", secret = false)
@@ -553,6 +555,53 @@ class SuwiNetPlugin(
                 )
             }
 
+        } catch (e: Exception) {
+            handleSuwinetException(e)
+        }
+    }
+
+    @PluginAction(
+        key = "get-uwv-werknemersverzekeringen-info",
+        title = "SuwiNet UWV werknemersverzekeringen info",
+        description = "SuwiNet UWV uitkeringen, uitkeringsperioden en maatregelen (UWVDossierWerknemersverzekeringenGSD)",
+        activityTypes = [ActivityTypeWithEventName.SERVICE_TASK_START]
+    )
+    fun getUwvWerknemersverzekeringenInfo(
+        @PluginActionProperty bsn: String,
+        @PluginActionProperty resultProcessVariableName: String,
+        @PluginActionProperty suffix: String? = "",
+        @PluginActionProperty dynamicProperties: List<String> = listOf(),
+        @PluginActionProperty startdatumPeriode: String? = null,
+        @PluginActionProperty einddatumPeriode: String? = null,
+        execution: DelegateExecution
+    ) {
+        require(bsn.isValidBsn()) { "Provided BSN does not pass elfproef" }
+
+        logger.info { "Getting UWV werknemersverzekeringen info for case ${execution.businessKey}" }
+
+        val (periodStart, periodEnd) = DateExpressionEvaluator.evaluatePeriod(
+            startdatumPeriode,
+            einddatumPeriode,
+            execution
+        )
+
+        suwinetUwvWerknemersverzekeringenService.setConfig(
+            getSuwinetSOAPClientConfig(),
+            suffix
+        )
+
+        try {
+            suwinetUwvWerknemersverzekeringenService.getUwvWerknemersverzekeringenByBsn(
+                bsn = bsn,
+                uwvInfoService = suwinetUwvWerknemersverzekeringenService.createUwvInfoService(),
+                dynamicProperties = dynamicProperties,
+                periodStart = periodStart,
+                periodEnd = periodEnd
+            )?.let {
+                execution.processInstance.setVariable(
+                    resultProcessVariableName, objectMapper.convertValue(it)
+                )
+            }
         } catch (e: Exception) {
             handleSuwinetException(e)
         }

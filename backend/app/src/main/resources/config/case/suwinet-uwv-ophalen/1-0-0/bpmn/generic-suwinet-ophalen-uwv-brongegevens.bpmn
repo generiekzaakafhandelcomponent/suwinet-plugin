@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_suwinet_uwv" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.51.1" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
+  <bpmn:process id="generic-suwinet-ophalen-uwv-brongegevens" name="Generic: Suwinet ophalen UWV Brongegevens" isExecutable="true">
+    <bpmn:startEvent id="UWVOphalenStartEvent" name="input: bsn" camunda:asyncAfter="true">
+      <bpmn:outgoing>Flow_Start_Inkomsten</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="OphalenUWVInkomstenTask" name="Ophalen UWV inkomsten (polisadministratie)" camunda:asyncAfter="true" camunda:expression="${true}">
+      <bpmn:incoming>Flow_Start_Inkomsten</bpmn:incoming>
+      <bpmn:outgoing>Flow_Inkomsten_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="InkomstenFoutEvent" name="Suwinet fout" attachedToRef="OphalenUWVInkomstenTask">
+      <bpmn:outgoing>Flow_InkomstenFout_Join</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_Inkomsten" camunda:errorCodeVariable="uwvInkomstenFoutcode" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="InkomstenJoinGateway">
+      <bpmn:incoming>Flow_Inkomsten_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_InkomstenFout_Join</bpmn:incoming>
+      <bpmn:outgoing>Flow_Join_Wv</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="OphalenUWVWerknemersverzekeringenTask" name="Ophalen UWV werknemersverzekeringen" camunda:asyncAfter="true" camunda:expression="${true}">
+      <bpmn:incoming>Flow_Join_Wv</bpmn:incoming>
+      <bpmn:outgoing>Flow_Wv_Join</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="WerknemersverzekeringenFoutEvent" name="Suwinet fout" attachedToRef="OphalenUWVWerknemersverzekeringenTask">
+      <bpmn:outgoing>Flow_WvFout_Join</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_Wv" camunda:errorCodeVariable="uwvWerknemersverzekeringenFoutcode" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="WerknemersverzekeringenJoinGateway">
+      <bpmn:incoming>Flow_Wv_Join</bpmn:incoming>
+      <bpmn:incoming>Flow_WvFout_Join</bpmn:incoming>
+      <bpmn:outgoing>Flow_Join_Opslaan</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="OpslaanUWVGegevensTask" name="Opslaan UWV gegevens in dossier" camunda:asyncAfter="true" camunda:expression="${suwinetDocumentWriterService.writeValueToDocumentAtPath(uwvDocumentData, &#39;/gegevensVanuitBronnen/uwv&#39;, execution.businessKey)}">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">// Bouwt het object dat op /gegevensVanuitBronnen/uwv in het dossier komt.
+// Testcase: de volledige dynamicProperties-respons van beide acties wordt ongewijzigd opgeslagen.
+function dataUit(rawVariableName) {
+    var raw = execution.getVariable(rawVariableName);
+    if (raw == null) return null;
+    var dynamic = raw.dynamicProperties;
+    if (dynamic == null || dynamic.isEmpty()) return null;
+    return dynamic;
+}
+
+function status(data, foutcode) {
+    if (foutcode != null) {
+        return 'Fout bij ophalen (' + foutcode + ')';
+    }
+    return data != null ? 'Opgehaald' : 'Niets gevonden';
+}
+
+var inkomsten = dataUit('uwvInkomstenInfoRaw');
+var werknemersverzekeringen = dataUit('uwvWerknemersverzekeringenInfoRaw');
+
+var statusMap = new java.util.LinkedHashMap();
+statusMap.put('inkomsten', String(status(
+    inkomsten,
+    execution.getVariable('uwvInkomstenFoutcode')
+)));
+statusMap.put('werknemersverzekeringen', String(status(
+    werknemersverzekeringen,
+    execution.getVariable('uwvWerknemersverzekeringenFoutcode')
+)));
+
+var uwvDocumentData = new java.util.LinkedHashMap();
+uwvDocumentData.put('status', statusMap);
+uwvDocumentData.put('inkomsten', inkomsten != null ? inkomsten : new java.util.LinkedHashMap());
+uwvDocumentData.put('werknemersverzekeringen', werknemersverzekeringen != null ? werknemersverzekeringen : new java.util.LinkedHashMap());
+
+execution.setVariableLocal('uwvDocumentData', uwvDocumentData);</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Join_Opslaan</bpmn:incoming>
+      <bpmn:outgoing>Flow_Opslaan_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="UWVOphalenEndEvent">
+      <bpmn:incoming>Flow_Opslaan_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Start_Inkomsten" sourceRef="UWVOphalenStartEvent" targetRef="OphalenUWVInkomstenTask" />
+    <bpmn:sequenceFlow id="Flow_Inkomsten_Join" sourceRef="OphalenUWVInkomstenTask" targetRef="InkomstenJoinGateway" />
+    <bpmn:sequenceFlow id="Flow_InkomstenFout_Join" sourceRef="InkomstenFoutEvent" targetRef="InkomstenJoinGateway" />
+    <bpmn:sequenceFlow id="Flow_Join_Wv" sourceRef="InkomstenJoinGateway" targetRef="OphalenUWVWerknemersverzekeringenTask" />
+    <bpmn:sequenceFlow id="Flow_Wv_Join" sourceRef="OphalenUWVWerknemersverzekeringenTask" targetRef="WerknemersverzekeringenJoinGateway" />
+    <bpmn:sequenceFlow id="Flow_WvFout_Join" sourceRef="WerknemersverzekeringenFoutEvent" targetRef="WerknemersverzekeringenJoinGateway" />
+    <bpmn:sequenceFlow id="Flow_Join_Opslaan" sourceRef="WerknemersverzekeringenJoinGateway" targetRef="OpslaanUWVGegevensTask" />
+    <bpmn:sequenceFlow id="Flow_Opslaan_End" sourceRef="OpslaanUWVGegevensTask" targetRef="UWVOphalenEndEvent" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="generic-suwinet-ophalen-uwv-brongegevens">
+      <bpmndi:BPMNShape id="UWVOphalenStartEvent_di" bpmnElement="UWVOphalenStartEvent">
+        <dc:Bounds x="182" y="209" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="175" y="252" width="50" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="OphalenUWVInkomstenTask_di" bpmnElement="OphalenUWVInkomstenTask">
+        <dc:Bounds x="270" y="187" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InkomstenFoutEvent_di" bpmnElement="InkomstenFoutEvent">
+        <dc:Bounds x="302" y="249" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="340" y="285" width="62" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="InkomstenJoinGateway_di" bpmnElement="InkomstenJoinGateway" isMarkerVisible="true">
+        <dc:Bounds x="435" y="202" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="OphalenUWVWerknemersverzekeringenTask_di" bpmnElement="OphalenUWVWerknemersverzekeringenTask">
+        <dc:Bounds x="540" y="187" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="WerknemersverzekeringenFoutEvent_di" bpmnElement="WerknemersverzekeringenFoutEvent">
+        <dc:Bounds x="572" y="249" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="610" y="285" width="62" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="WerknemersverzekeringenJoinGateway_di" bpmnElement="WerknemersverzekeringenJoinGateway" isMarkerVisible="true">
+        <dc:Bounds x="705" y="202" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="OpslaanUWVGegevensTask_di" bpmnElement="OpslaanUWVGegevensTask">
+        <dc:Bounds x="810" y="187" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="UWVOphalenEndEvent_di" bpmnElement="UWVOphalenEndEvent">
+        <dc:Bounds x="972" y="209" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Inkomsten_di" bpmnElement="Flow_Start_Inkomsten">
+        <di:waypoint x="218" y="227" />
+        <di:waypoint x="270" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Inkomsten_Join_di" bpmnElement="Flow_Inkomsten_Join">
+        <di:waypoint x="370" y="227" />
+        <di:waypoint x="435" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_InkomstenFout_Join_di" bpmnElement="Flow_InkomstenFout_Join">
+        <di:waypoint x="320" y="285" />
+        <di:waypoint x="320" y="330" />
+        <di:waypoint x="460" y="330" />
+        <di:waypoint x="460" y="252" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Join_Wv_di" bpmnElement="Flow_Join_Wv">
+        <di:waypoint x="485" y="227" />
+        <di:waypoint x="540" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Wv_Join_di" bpmnElement="Flow_Wv_Join">
+        <di:waypoint x="640" y="227" />
+        <di:waypoint x="705" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_WvFout_Join_di" bpmnElement="Flow_WvFout_Join">
+        <di:waypoint x="590" y="285" />
+        <di:waypoint x="590" y="330" />
+        <di:waypoint x="730" y="330" />
+        <di:waypoint x="730" y="252" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Join_Opslaan_di" bpmnElement="Flow_Join_Opslaan">
+        <di:waypoint x="755" y="227" />
+        <di:waypoint x="810" y="227" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Opslaan_End_di" bpmnElement="Flow_Opslaan_End">
+        <di:waypoint x="910" y="227" />
+        <di:waypoint x="972" y="227" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

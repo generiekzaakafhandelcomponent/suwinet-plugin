@@ -33,6 +33,7 @@ import {DuoPersoonsInfoComponent} from "./components/duo-persoons-info/duo-perso
 import {SvbPersoonsInfoComponent} from "./components/svb-persoons-info/svb-persoons-info.component";
 import {DuoStudiefinancieringComponent} from "./components/duo-studiefinanciering/duo-studiefinanciering.component";
 import {UwvInkomstenInfoComponent} from "./components/uwv-inkomsten-persoon-info/uwv-inkomsten-info.component";
+import {UwvWerknemersverzekeringenInfoComponent} from "./components/uwv-werknemersverzekeringen-info/uwv-werknemersverzekeringen-info.component";
 import {KadastraleObjectenComponent} from "./components/kadasterobjecten/kadastrale-objecten.component";
 import {
     BijstandsregelingenInfoComponent
@@ -57,6 +58,7 @@ const suwinetPluginSpecification: PluginSpecification = {
         'get-duo-studiefinanciering': DuoStudiefinancieringComponent,
         'get-svb-persoonsinfo': SvbPersoonsInfoComponent,
         'get-uwv-inkomsten-info': UwvInkomstenInfoComponent,
+        'get-uwv-werknemersverzekeringen-info': UwvWerknemersverzekeringenInfoComponent,
     },
     pluginTranslations: {
         nl: {
@@ -92,6 +94,10 @@ const suwinetPluginSpecification: PluginSpecification = {
                 'Selecteer de plugin die de authenticatie kan afhandelen. Wanneer de selectiebox leeg blijft zal de authenticatie plugin eerst aangemaakt moeten worden',
             baseUrl: 'Base URL',
             suffix: 'Achtervoegsel',
+            startdatumPeriode: 'Startdatum periode',
+            startdatumPeriodeTooltip: 'Optioneel. Alleen gegevens die overlappen met deze periode worden teruggegeven. Een datum (yyyy-MM-dd) of expressie, bijvoorbeeld ${localDateTimeNow.minusMonths(3)}',
+            einddatumPeriode: 'Einddatum periode',
+            einddatumPeriodeTooltip: 'Optioneel. Standaard vandaag als er een startdatum is ingevuld. Een datum (yyyy-MM-dd) of expressie, bijvoorbeeld ${localDateTimeNow}',
             maxPeriods: 'Maximale perioden',
             connectionTimeout: 'connectionTimeout: Specifies the amount of time, in seconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite',
             receiveTimeout: 'receiveTimeout: Specifies the amount of time, in seconds, that the consumer will wait for a response before it times out. 0 is infinite.',
@@ -107,7 +113,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Ophalen DUO persoonsinfo',
             'get-duo-studiefinanciering': 'Ophalen DUO studiefinanciering',
             'get-svb-persoonsinfo': 'Ophalen SVB persoonsinfo',
-            'get-uwv-inkomsten-info': 'Ophalen UWV inkomsten info'
+            'get-uwv-inkomsten-info': 'Ophalen UWV inkomsten info',
+            'get-uwv-werknemersverzekeringen-info': 'Ophalen UWV werknemersverzekeringen (uitkeringen en maatregelen)'
         },
         en: {
             configurationTitle: 'Configuration name',
@@ -141,6 +148,10 @@ const suwinetPluginSpecification: PluginSpecification = {
                 'Select the plugin that can handle the authentication. If the selection box remains empty, the authentication plugin will have to be created first',
             baseUrl: 'Base URL',
             suffix: 'Suffix',
+            startdatumPeriode: 'Period start date',
+            startdatumPeriodeTooltip: 'Optional. Only data overlapping this period is returned. A date (yyyy-MM-dd) or expression, e.g. ${localDateTimeNow.minusMonths(3)}',
+            einddatumPeriode: 'Period end date',
+            einddatumPeriodeTooltip: 'Optional. Defaults to today when a start date is set. A date (yyyy-MM-dd) or expression, e.g. ${localDateTimeNow}',
             dynamicProperties: 'Dynamic properties',
             maxPeriods: 'Maximum periods',
             connectionTimeout: 'connectionTimeout: Specifies the amount of time, in seconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite',
@@ -157,7 +168,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Retrieve DUO personal information',
             'get-duo-studiefinanciering': 'Retrieve DUO student finance information',
             'get-svb-persoonsinfo': 'Retrieve SVB personal information',
-            'get-uwv-inkomsten-info': 'Retrieve UWV income information'
+            'get-uwv-inkomsten-info': 'Retrieve UWV income information',
+            'get-uwv-werknemersverzekeringen-info': 'Retrieve UWV employee insurance benefits and sanctions'
         },
         de: {
             configurationTitle: 'Configuration name',
@@ -191,6 +203,10 @@ const suwinetPluginSpecification: PluginSpecification = {
                 'Wählen Sie das Plugin aus, das die Authentifizierung verarbeiten kann. Bleibt das Auswahlfeld leer, muss zunächst das Authentifizierungs-Plugin erstellt werden',
             baseUrl: 'Base URL',
             suffix: 'Suffix',
+            startdatumPeriode: 'Startdatum Zeitraum',
+            startdatumPeriodeTooltip: 'Optional. Es werden nur Daten zurückgegeben, die sich mit diesem Zeitraum überschneiden. Ein Datum (yyyy-MM-dd) oder Ausdruck, z. B. ${localDateTimeNow.minusMonths(3)}',
+            einddatumPeriode: 'Enddatum Zeitraum',
+            einddatumPeriodeTooltip: 'Optional. Standardmäßig heute, wenn ein Startdatum angegeben ist. Ein Datum (yyyy-MM-dd) oder Ausdruck, z. B. ${localDateTimeNow}',
             dynamicProperties: 'Dynamische Eigenschaften',
             maxPeriods: 'Maximale Perioden',
             connectionTimeout: 'connectionTimeout: Specifies the amount of time, in seconds, that the consumer will attempt to establish a connection before it times out. 0 is infinite',
@@ -207,7 +223,8 @@ const suwinetPluginSpecification: PluginSpecification = {
             'get-duo-persoonsinfo': 'Abrufen von DUO-Personeninformationen',
             'get-duo-studiefinanciering': 'Abrufen von DUO-Studienfinanzierungsinformationen',
             'get-svb-persoonsinfo': 'Abrufen von SVB-Personeninformationen',
-            'get-uwv-inkomsten-info': 'Abrufen von UWV-Einkommensinformationen'
+            'get-uwv-inkomsten-info': 'Abrufen von UWV-Einkommensinformationen',
+            'get-uwv-werknemersverzekeringen-info': 'Abrufen von UWV-Arbeitnehmerversicherungsleistungen und Sanktionen'
         },
     },
 };

@@ -18,6 +18,7 @@ import com.ritense.valtimoplugins.suwinet.service.SuwinetKadasterInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetRdwService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetSvbPersoonsInfoService
 import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvPersoonsIkvService
+import com.ritense.valtimoplugins.suwinet.service.SuwinetUwvWerknemersverzekeringenService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -137,6 +138,15 @@ class SuwinetAutoConfiguration {
     }
 
     @Bean
+    @ProcessBean
+    fun suwinetUwvWerknemersverzekeringenService(
+        suwinetSOAPClient: SuwinetSOAPClient,
+        dynamicResponseFactory: DynamicResponseFactory
+    ): SuwinetUwvWerknemersverzekeringenService {
+        return SuwinetUwvWerknemersverzekeringenService(suwinetSOAPClient, dynamicResponseFactory)
+    }
+
+    @Bean
     fun suwiNetPluginFactory(
         pluginService: PluginService,
         suwinetBrpInfoService: SuwinetBrpInfoService,
@@ -146,7 +156,8 @@ class SuwinetAutoConfiguration {
         suwinetSvbPersoonsInfoService: SuwinetSvbPersoonsInfoService,
         suwinetUwvPersoonsIkvService: SuwinetUwvPersoonsIkvService,
         suwinetKadasterInfoService: SuwinetKadasterInfoService,
-        suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService
+        suwinetBijstandsregelingenService: SuwinetBijstandsregelingenService,
+        suwinetUwvWerknemersverzekeringenService: SuwinetUwvWerknemersverzekeringenService
     ): SuwiNetPluginFactory = SuwiNetPluginFactory(
         pluginService,
         suwinetBrpInfoService,
@@ -156,6 +167,7 @@ class SuwinetAutoConfiguration {
         suwinetRdwService,
         suwinetSvbPersoonsInfoService,
         suwinetUwvPersoonsIkvService,
-        suwinetBijstandsregelingenService
+        suwinetBijstandsregelingenService,
+        suwinetUwvWerknemersverzekeringenService
     )
 }

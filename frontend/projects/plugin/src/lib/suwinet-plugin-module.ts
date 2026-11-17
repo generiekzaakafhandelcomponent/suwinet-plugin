@@ -34,6 +34,7 @@ import {DuoPersoonsInfoComponent} from "./components/duo-persoons-info/duo-perso
 import {DuoStudiefinancieringComponent} from "./components/duo-studiefinanciering/duo-studiefinanciering.component";
 import {SvbPersoonsInfoComponent} from "./components/svb-persoons-info/svb-persoons-info.component";
 import {UwvInkomstenInfoComponent} from "./components/uwv-inkomsten-persoon-info/uwv-inkomsten-info.component";
+import {UwvWerknemersverzekeringenInfoComponent} from "./components/uwv-werknemersverzekeringen-info/uwv-werknemersverzekeringen-info.component";
 import {KadastraleObjectenComponent} from "./components/kadasterobjecten/kadastrale-objecten.component";
 import {
     BijstandsregelingenInfoComponent
@@ -55,6 +56,7 @@ import {KadastraleAanduidingenComponent} from "./components/kadastrale-aanduidin
         RdwVoertuigComponent,
         SvbPersoonsInfoComponent,
         UwvInkomstenInfoComponent,
+        UwvWerknemersverzekeringenInfoComponent,
         BijstandsregelingenInfoComponent
     ],
     imports: [CommonModule, PluginTranslatePipeModule, FormModule, InputModule, FormsModule, CarbonMultiInputModule, ParagraphModule, SelectModule],
@@ -72,6 +74,7 @@ import {KadastraleAanduidingenComponent} from "./components/kadastrale-aanduidin
         RdwVoertuigComponent,
         SvbPersoonsInfoComponent,
         UwvInkomstenInfoComponent,
+        UwvWerknemersverzekeringenInfoComponent,
         BijstandsregelingenInfoComponent
     ],
 })
