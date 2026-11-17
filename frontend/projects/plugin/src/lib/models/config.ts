@@ -99,17 +99,23 @@ export interface SVBPersoonsInfoComponent extends BaseActionConfig {
     bsn: string;
     dynamicProperties: Array<string>;
     resultProcessVariableName: string;
+    startdatumPeriode?: string;
+    einddatumPeriode?: string;
 }
 
 export interface UwvInkomstenPersoonInfoConfig extends BaseActionConfig {
     bsn: string;
     dynamicProperties: Array<string>;
     resultProcessVariableName: string;
+    startdatumPeriode?: string;
+    einddatumPeriode?: string;
 }
 
 export interface UwvWerknemersverzekeringenInfoConfig extends BaseActionConfig {
     bsn: string;
     dynamicProperties: Array<string>;
     resultProcessVariableName: string;
+    startdatumPeriode?: string;
+    einddatumPeriode?: string;
 }
 
